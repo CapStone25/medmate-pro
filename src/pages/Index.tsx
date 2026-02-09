@@ -5,10 +5,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { medicines } from "@/data/medicines";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Building2, Shield } from "lucide-react";
+import { ArrowRight, Users, Building2, Shield, TrendingUp, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import usePageTitle from "@/hooks/usePageTitle";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const Index = () => {
+  usePageTitle("");
   const featuredMedicines = medicines.slice(0, 8);
 
   const roles = [
@@ -32,10 +35,45 @@ const Index = () => {
     },
   ];
 
+  const stats = [
+    { value: 12000, suffix: "+", label: "Medicines", icon: TrendingUp },
+    { value: 5000, suffix: "+", label: "Users", icon: Users },
+    { value: 150, suffix: "+", label: "Companies", icon: Building2 },
+    { value: 4.9, suffix: "/5", label: "Rating", icon: Star, isDecimal: true },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+
+      {/* Stats Banner */}
+      <section className="py-12 bg-card border-y border-border">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <span className="text-3xl sm:text-4xl font-bold font-display text-foreground">
+                    {stat.isDecimal ? stat.value : (
+                      <AnimatedCounter value={stat.value as number} duration={1.5} />
+                    )}
+                  </span>
+                  <span className="text-xl font-bold font-display text-primary">{stat.suffix}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Featured Medicines */}
       <section className="py-20 bg-background">
@@ -46,8 +84,10 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">Explore</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-2 mb-4">
+            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">
+              Explore
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">
               Featured Medicines
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
@@ -61,13 +101,19 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
             <Link to="/medicines">
-              <Button variant="outline" size="lg" className="gap-2 rounded-xl">
-                View All Medicines <ArrowRight className="w-4 h-4" />
+              <Button variant="outline" size="lg" className="gap-2 rounded-xl group">
+                View All Medicines
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -80,8 +126,10 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">For Everyone</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-2 mb-4">
+            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">
+              For Everyone
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">
               Built for Three Roles
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
@@ -97,11 +145,15 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1"
+                whileHover={{ y: -4 }}
+                className="bg-card rounded-2xl border border-border p-6 shadow-card hover:shadow-card-hover transition-shadow duration-500"
               >
-                <div className={`w-12 h-12 rounded-xl ${role.color} flex items-center justify-center mb-4`}>
+                <motion.div
+                  whileHover={{ rotate: 5, scale: 1.1 }}
+                  className={`w-12 h-12 rounded-xl ${role.color} flex items-center justify-center mb-4`}
+                >
                   <role.icon className="w-6 h-6" />
-                </div>
+                </motion.div>
                 <h3 className="text-lg font-semibold font-display text-foreground mb-2">{role.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{role.desc}</p>
               </motion.div>
@@ -130,8 +182,9 @@ const Index = () => {
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link to="/register">
-                  <Button variant="accent" size="lg" className="rounded-xl gap-2">
-                    Create Free Account <ArrowRight className="w-4 h-4" />
+                  <Button variant="accent" size="lg" className="rounded-xl gap-2 group">
+                    Create Free Account
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
                 <Link to="/medicines">
