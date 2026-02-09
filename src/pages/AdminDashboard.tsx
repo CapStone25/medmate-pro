@@ -4,11 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { medicines } from "@/data/medicines";
 import { User } from "@/types";
-import { Users, Building2, Pill, Trash2, Shield } from "lucide-react";
+import { Users, Building2, Pill, Trash2, Shield, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import usePageTitle from "@/hooks/usePageTitle";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const AdminDashboard = () => {
   const { user, isAuthenticated } = useAuth();
@@ -19,6 +21,9 @@ const AdminDashboard = () => {
     { id: "4", email: "jane@example.com", name: "Jane Smith", role: "user" },
     { id: "5", email: "medtech@example.com", name: "MedTech Labs", role: "company", companyName: "MedTech Laboratories" },
   ]);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  usePageTitle("Admin Dashboard");
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "admin") {
@@ -29,12 +34,23 @@ const AdminDashboard = () => {
   if (!user) return null;
 
   const handleRemoveUser = (userId: string) => {
+    if (confirmDelete !== userId) {
+      setConfirmDelete(userId);
+      return;
+    }
     setMockUsers(prev => prev.filter(u => u.id !== userId));
+    setConfirmDelete(null);
     toast.success("User removed successfully");
   };
 
   const users = mockUsers.filter(u => u.role === "user");
   const companies = mockUsers.filter(u => u.role === "company");
+
+  const stats = [
+    { icon: Users, value: users.length, label: "Total Users", color: "bg-primary/10 text-primary" },
+    { icon: Building2, value: companies.length, label: "Companies", color: "bg-accent/10 text-accent" },
+    { icon: Pill, value: medicines.length, label: "Medicines", color: "bg-secondary text-secondary-foreground" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,9 +62,14 @@ const AdminDashboard = () => {
             {/* Header */}
             <div className="bg-card rounded-2xl border border-border p-6 sm:p-8 shadow-card mb-8">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl gradient-accent flex items-center justify-center shadow-glow-accent">
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className="w-14 h-14 rounded-2xl gradient-accent flex items-center justify-center shadow-glow-accent"
+                >
                   <Shield className="w-7 h-7 text-accent-foreground" />
-                </div>
+                </motion.div>
                 <div>
                   <h1 className="text-2xl font-bold font-display text-foreground">Admin Dashboard</h1>
                   <p className="text-muted-foreground">Manage users, companies, and medicines</p>
@@ -58,97 +79,143 @@ const AdminDashboard = () => {
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="bg-card rounded-xl border border-border p-5 shadow-card">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-primary" />
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.05 }}
+                  className="bg-card rounded-xl border border-border p-5 shadow-card hover:shadow-card-hover transition-shadow duration-300"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
+                      <stat.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-display text-foreground">
+                        <AnimatedCounter value={stat.value} />
+                      </p>
+                      <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold font-display text-foreground">{users.length}</p>
-                    <p className="text-xs text-muted-foreground">Total Users</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-xl border border-border p-5 shadow-card">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold font-display text-foreground">{companies.length}</p>
-                    <p className="text-xs text-muted-foreground">Companies</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-xl border border-border p-5 shadow-card">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                    <Pill className="w-5 h-5 text-secondary-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold font-display text-foreground">{medicines.length}</p>
-                    <p className="text-xs text-muted-foreground">Medicines</p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Users Table */}
-              <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
-                <div className="p-5 border-b border-border flex items-center gap-3">
-                  <Users className="w-5 h-5 text-primary" />
-                  <h2 className="text-lg font-semibold font-display text-foreground">Users</h2>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-card rounded-2xl border border-border shadow-card overflow-hidden"
+              >
+                <div className="p-5 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-primary" />
+                    <h2 className="text-lg font-semibold font-display text-foreground">Users</h2>
+                  </div>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                    {users.length}
+                  </span>
                 </div>
                 <div className="divide-y divide-border">
-                  {users.length > 0 ? users.map(u => (
-                    <div key={u.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{u.name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveUser(u.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  <AnimatePresence>
+                    {users.length > 0 ? users.map(u => (
+                      <motion.div
+                        key={u.id}
+                        layout
+                        exit={{ opacity: 0, x: -20 }}
+                        className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )) : (
-                    <div className="p-8 text-center text-sm text-muted-foreground">No users found</div>
-                  )}
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-xs font-bold text-primary">{u.name.charAt(0)}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{u.name}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant={confirmDelete === u.id ? "destructive" : "ghost"}
+                          size="sm"
+                          onClick={() => handleRemoveUser(u.id)}
+                          onBlur={() => setConfirmDelete(null)}
+                          className={confirmDelete !== u.id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}
+                        >
+                          {confirmDelete === u.id ? (
+                            <span className="flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3" /> Confirm
+                            </span>
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </motion.div>
+                    )) : (
+                      <div className="p-8 text-center text-sm text-muted-foreground">No users found</div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Companies Table */}
-              <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
-                <div className="p-5 border-b border-border flex items-center gap-3">
-                  <Building2 className="w-5 h-5 text-accent" />
-                  <h2 className="text-lg font-semibold font-display text-foreground">Companies</h2>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="bg-card rounded-2xl border border-border shadow-card overflow-hidden"
+              >
+                <div className="p-5 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="w-5 h-5 text-accent" />
+                    <h2 className="text-lg font-semibold font-display text-foreground">Companies</h2>
+                  </div>
+                  <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">
+                    {companies.length}
+                  </span>
                 </div>
                 <div className="divide-y divide-border">
-                  {companies.length > 0 ? companies.map(c => (
-                    <div key={c.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.companyName}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveUser(c.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  <AnimatePresence>
+                    {companies.length > 0 ? companies.map(c => (
+                      <motion.div
+                        key={c.id}
+                        layout
+                        exit={{ opacity: 0, x: -20 }}
+                        className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )) : (
-                    <div className="p-8 text-center text-sm text-muted-foreground">No companies found</div>
-                  )}
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                            <Building2 className="w-3.5 h-3.5 text-accent" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{c.name}</p>
+                            <p className="text-xs text-muted-foreground">{c.companyName}</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant={confirmDelete === c.id ? "destructive" : "ghost"}
+                          size="sm"
+                          onClick={() => handleRemoveUser(c.id)}
+                          onBlur={() => setConfirmDelete(null)}
+                          className={confirmDelete !== c.id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}
+                        >
+                          {confirmDelete === c.id ? (
+                            <span className="flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3" /> Confirm
+                            </span>
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </motion.div>
+                    )) : (
+                      <div className="p-8 text-center text-sm text-muted-foreground">No companies found</div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>

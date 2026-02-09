@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
-import { Pill, Eye, EyeOff } from "lucide-react";
+import { Pill, Eye, EyeOff, ArrowRight, Users, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import usePageTitle from "@/hooks/usePageTitle";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -19,6 +20,8 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  usePageTitle("Create Account");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +37,9 @@ const Register = () => {
     setLoading(false);
   };
 
-  const roles: { value: UserRole; label: string; desc: string }[] = [
-    { value: "user", label: "Patient / User", desc: "Search & track medicines" },
-    { value: "company", label: "Company", desc: "Add prescriptions" },
+  const roles: { value: UserRole; label: string; desc: string; icon: typeof Users }[] = [
+    { value: "user", label: "Patient / User", desc: "Search & track medicines", icon: Users },
+    { value: "company", label: "Company", desc: "Add prescriptions", icon: Building2 },
   ];
 
   return (
@@ -46,9 +49,14 @@ const Register = () => {
         <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-primary/20 blur-3xl animate-float" />
         <div className="absolute bottom-20 right-20 w-96 h-96 rounded-full bg-accent/15 blur-3xl animate-float" style={{ animationDelay: "-3s" }} />
         <div className="relative z-10 text-center">
-          <div className="w-24 h-24 rounded-3xl gradient-accent flex items-center justify-center mx-auto mb-8 shadow-glow-accent">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+            className="w-24 h-24 rounded-3xl gradient-accent flex items-center justify-center mx-auto mb-8 shadow-glow-accent"
+          >
             <Pill className="w-12 h-12 text-accent-foreground" />
-          </div>
+          </motion.div>
           <h2 className="text-3xl font-bold font-display text-primary-foreground mb-4">Join RxVault Today</h2>
           <p className="text-primary-foreground/70 max-w-sm">
             Create your account and start exploring our comprehensive medicine database.
@@ -63,10 +71,13 @@ const Register = () => {
           animate={{ opacity: 1, x: 0 }}
           className="w-full max-w-md"
         >
-          <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow">
+          <Link to="/" className="flex items-center gap-2 mb-8 group">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow"
+            >
               <Pill className="w-5 h-5 text-primary-foreground" />
-            </div>
+            </motion.div>
             <span className="text-xl font-bold font-display text-gradient">RxVault</span>
           </Link>
 
@@ -79,9 +90,10 @@ const Register = () => {
               <Label>Account Type</Label>
               <div className="grid grid-cols-2 gap-3">
                 {roles.map(r => (
-                  <button
+                  <motion.button
                     key={r.value}
                     type="button"
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setRole(r.value)}
                     className={`p-3 rounded-xl border text-left transition-all duration-300 ${
                       role === r.value
@@ -89,9 +101,12 @@ const Register = () => {
                         : "border-border bg-card hover:border-primary/30"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-foreground">{r.label}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <r.icon className={`w-4 h-4 ${role === r.value ? "text-primary" : "text-muted-foreground"}`} />
+                      <p className="text-sm font-semibold text-foreground">{r.label}</p>
+                    </div>
                     <p className="text-xs text-muted-foreground">{r.desc}</p>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -109,7 +124,12 @@ const Register = () => {
             </div>
 
             {role === "company" && (
-              <div className="space-y-2">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2"
+              >
                 <Label htmlFor="companyName">Company Name</Label>
                 <Input
                   id="companyName"
@@ -119,7 +139,7 @@ const Register = () => {
                   required
                   className="h-12 rounded-xl"
                 />
-              </div>
+              </motion.div>
             )}
 
             <div className="space-y-2">
@@ -141,7 +161,7 @@ const Register = () => {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  placeholder="Create a password (min 6 chars)"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
@@ -158,8 +178,9 @@ const Register = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 rounded-xl text-base" disabled={loading}>
+            <Button type="submit" className="w-full h-12 rounded-xl text-base gap-2 group" disabled={loading}>
               {loading ? "Creating account..." : "Create Account"}
+              {!loading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
             </Button>
           </form>
 
