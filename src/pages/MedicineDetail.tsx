@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { medicines, getCategoryColor, getCategoryIcon } from "@/data/medicines";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,6 @@ const MedicineDetail = () => {
 
   usePageTitle(medicine?.name || "Medicine Not Found");
 
-  // Track view in search history — only once per mount
   useEffect(() => {
     if (medicine && isAuthenticated && !hasTracked.current) {
       hasTracked.current = true;
@@ -49,7 +48,6 @@ const MedicineDetail = () => {
     );
   }
 
-  // Related medicines (same category, exclude current)
   const relatedMedicines = medicines
     .filter(m => m.category === medicine.category && m.id !== medicine.id)
     .slice(0, 3);
@@ -58,6 +56,8 @@ const MedicineDetail = () => {
     { icon: Pill, label: "Dosage", value: medicine.dosage, color: "bg-primary/10 text-primary" },
     { icon: Building2, label: "Manufacturer", value: medicine.manufacturer, color: "bg-accent/10 text-accent" },
     { icon: DollarSign, label: "Price", value: medicine.price, color: "bg-secondary text-secondary-foreground" },
+    ...(medicine.activeIngredient ? [{ icon: FlaskConical, label: "Active Ingredient", value: medicine.activeIngredient, color: "bg-primary/10 text-primary" }] : []),
+    ...(medicine.form ? [{ icon: Package, label: "Form", value: medicine.form, color: "bg-accent/10 text-accent" }] : []),
   ];
 
   return (
@@ -65,7 +65,7 @@ const MedicineDetail = () => {
       <Navbar />
 
       <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Link to="/medicines" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
               <ArrowLeft className="w-4 h-4" /> Back to Medicines
@@ -78,31 +78,34 @@ const MedicineDetail = () => {
             transition={{ delay: 0.1 }}
             className="bg-card rounded-2xl border border-border overflow-hidden shadow-card"
           >
-            {/* Header */}
-            <div className={`h-3 w-full bg-gradient-to-r ${getCategoryColor(medicine.category)}`} />
-            <div className="p-6 sm:p-8">
-              <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${getCategoryColor(medicine.category)} flex items-center justify-center text-4xl shadow-lg flex-shrink-0`}
-                >
-                  {getCategoryIcon(medicine.category)}
-                </motion.div>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-bold font-display text-foreground">{medicine.name}</h1>
-                    <Badge variant={medicine.requiresPrescription ? "default" : "secondary"}>
-                      {medicine.requiresPrescription ? "Prescription Required" : "Over the Counter"}
-                    </Badge>
-                  </div>
-                  <p className="text-lg text-muted-foreground">{medicine.genericName}</p>
-                </div>
+            {/* Hero section with image */}
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="relative h-64 md:h-auto md:min-h-[360px] bg-muted overflow-hidden">
+                <img
+                  src={medicine.image}
+                  alt={medicine.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className={`absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r ${getCategoryColor(medicine.category)}`} />
               </div>
 
+              <div className="p-6 sm:p-8 flex flex-col justify-center">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <span className="text-3xl">{getCategoryIcon(medicine.category)}</span>
+                  <Badge variant="outline" className="text-xs">{medicine.category}</Badge>
+                  <Badge variant={medicine.requiresPrescription ? "default" : "secondary"}>
+                    {medicine.requiresPrescription ? "Prescription Required" : "Over the Counter"}
+                  </Badge>
+                </div>
+                <h1 className="text-3xl font-bold font-display text-foreground mt-2 mb-1">{medicine.name}</h1>
+                <p className="text-lg text-muted-foreground mb-4">{medicine.genericName}</p>
+                <p className="text-2xl font-bold text-primary">{medicine.price}</p>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 border-t border-border">
               {/* Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {infoCards.map((info, i) => (
                   <motion.div
                     key={info.label}
