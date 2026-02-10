@@ -9,6 +9,9 @@ export interface Medicine {
   price: string;
   manufacturer: string;
   requiresPrescription: boolean;
+  image: string;
+  activeIngredient?: string;
+  form?: string;
 }
 
 export type UserRole = 'admin' | 'user' | 'company';
