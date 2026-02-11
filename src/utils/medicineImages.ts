@@ -1,36 +1,12 @@
-import amoxicillinImg from "@/assets/medicines/amoxicillin.jpg";
-import ibuprofenImg from "@/assets/medicines/ibuprofen.jpg";
-import metforminImg from "@/assets/medicines/metformin.jpg";
-import lisinoprilImg from "@/assets/medicines/lisinopril.jpg";
-import omeprazoleImg from "@/assets/medicines/omeprazole.jpg";
-import cetirizineImg from "@/assets/medicines/cetirizine.jpg";
-import atorvastatinImg from "@/assets/medicines/atorvastatin.jpg";
-import paracetamolImg from "@/assets/medicines/paracetamol.jpg";
-import azithromycinImg from "@/assets/medicines/azithromycin.jpg";
-import salbutamolImg from "@/assets/medicines/salbutamol.jpg";
-import losartanImg from "@/assets/medicines/losartan.jpg";
-import ciprofloxacinImg from "@/assets/medicines/ciprofloxacin.jpg";
-import milgaImg from "@/assets/medicines/milga.png";
-
-const imageMap: Record<string, string> = {
-  amoxicillin: amoxicillinImg,
-  ibuprofen: ibuprofenImg,
-  metformin: metforminImg,
-  lisinopril: lisinoprilImg,
-  omeprazole: omeprazoleImg,
-  cetirizine: cetirizineImg,
-  atorvastatin: atorvastatinImg,
-  paracetamol: paracetamolImg,
-  azithromycin: azithromycinImg,
-  salbutamol: salbutamolImg,
-  losartan: losartanImg,
-  ciprofloxacin: ciprofloxacinImg,
-  milga: milgaImg,
-};
+// Medicine image URLs - using placeholder service for demo
+// In production, these would be actual image URLs from your CDN or database
 
 export const getMedicineImage = (imageUrl: string | null): string | null => {
   if (!imageUrl) return null;
-  return imageMap[imageUrl] || imageUrl;
+  // Return the URL if it's already a full URL (from Supabase or external source)
+  if (imageUrl.startsWith("http")) return imageUrl;
+  // Otherwise return null to use placeholder
+  return null;
 };
 
 export const categories = [

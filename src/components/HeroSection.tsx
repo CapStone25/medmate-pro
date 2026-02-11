@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Search, Mic, MicOff, Sparkles, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
@@ -55,7 +54,7 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       <div className="absolute inset-0">
-        <img src={heroBg} alt="Medical background" className="w-full h-full object-cover" loading="eager" />
+        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20" />
         <div className="absolute inset-0 gradient-hero opacity-85" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
       </div>
