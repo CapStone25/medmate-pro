@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pill, Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -11,19 +11,19 @@ const navLinks = [
 ];
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { profile, role, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
   const getDashboardLink = () => {
-    if (!user) return "/login";
-    switch (user.role) {
+    if (!role) return "/login";
+    switch (role) {
       case "admin": return "/admin";
       case "company": return "/company";
       default: return "/dashboard";
@@ -64,16 +64,28 @@ const Navbar = () => {
             </Link>
           ))}
           {isAuthenticated && (
-            <Link
-              to={getDashboardLink()}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                isActive(getDashboardLink())
-                  ? "text-primary bg-primary/8"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link
+                to={getDashboardLink()}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  isActive(getDashboardLink())
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/settings"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  isActive("/settings")
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+              </Link>
+            </>
           )}
         </div>
 
@@ -85,7 +97,7 @@ const Navbar = () => {
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
                     <User className="w-3.5 h-3.5 text-primary-foreground" />
                   </div>
-                  <span className="text-sm max-w-[120px] truncate">{user?.name}</span>
+                  <span className="text-sm max-w-[120px] truncate">{profile?.name || "User"}</span>
                 </Button>
               </Link>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 rounded-lg">
@@ -137,20 +149,29 @@ const Navbar = () => {
                 </Link>
               ))}
               {isAuthenticated && (
-                <Link
-                  to={getDashboardLink()}
-                  onClick={() => setMobileOpen(false)}
-                  className={`py-2.5 px-3 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
-                    isActive(getDashboardLink()) ? "text-primary bg-primary/8" : "text-foreground"
-                  }`}
-                >
-                  <LayoutDashboard className="w-4 h-4" /> Dashboard
-                </Link>
+                <>
+                  <Link
+                    to={getDashboardLink()}
+                    onClick={() => setMobileOpen(false)}
+                    className={`py-2.5 px-3 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors ${
+                      isActive(getDashboardLink()) ? "text-primary bg-primary/8" : "text-foreground"
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4" /> Dashboard
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={() => setMobileOpen(false)}
+                    className="py-2.5 px-3 rounded-lg text-sm font-medium flex items-center gap-2 text-foreground"
+                  >
+                    <Settings className="w-4 h-4" /> Settings
+                  </Link>
+                </>
               )}
               <div className="border-t border-border pt-3 mt-2 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <>
-                    <span className="text-sm text-muted-foreground px-3">Signed in as {user?.name}</span>
+                    <span className="text-sm text-muted-foreground px-3">Signed in as {profile?.name}</span>
                     <Button variant="outline" size="sm" onClick={() => { handleLogout(); setMobileOpen(false); }}>
                       Logout
                     </Button>
