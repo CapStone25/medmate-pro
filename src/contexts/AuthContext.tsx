@@ -1,123 +1,109 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { User, UserRole, SearchHistoryItem } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { AppRole, Profile, UserRole } from "@/types";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface AuthContextType {
-  user: User | null;
+  user: SupabaseUser | null;
+  profile: Profile | null;
+  role: AppRole | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role: UserRole, companyName?: string) => Promise<boolean>;
-  logout: () => void;
-  searchHistory: SearchHistoryItem[];
-  addToSearchHistory: (query: string, medicineId?: string, medicineName?: string) => void;
-  clearSearchHistory: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, email: string, password: string, companyName?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const MOCK_USERS: (User & { password: string })[] = [
-  { id: "1", email: "admin@rxvault.com", name: "Admin User", role: "admin", password: "admin123" },
-  { id: "2", email: "user@rxvault.com", name: "John Doe", role: "user", password: "user123" },
-  { id: "3", email: "company@rxvault.com", name: "PharmaCorp", role: "company", companyName: "PharmaCorp Industries", password: "company123" },
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<AppRole | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfileAndRole = useCallback(async (userId: string) => {
+    try {
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("user_roles").select("*").eq("user_id", userId).maybeSingle(),
+      ]);
+      if (profileRes.data) setProfile(profileRes.data as unknown as Profile);
+      if (roleRes.data) setRole((roleRes.data as unknown as UserRole).role);
+    } catch (e) {
+      console.error("Error fetching profile:", e);
+    }
+  }, []);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("rxvault_user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    const savedHistory = localStorage.getItem("rxvault_search_history");
-    if (savedHistory) {
-      setSearchHistory(JSON.parse(savedHistory));
-    }
-  }, []);
-
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const found = MOCK_USERS.find(u => u.email === email && u.password === password);
-    if (found) {
-      const { password: _, ...userData } = found;
-      setUser(userData);
-      localStorage.setItem("rxvault_user", JSON.stringify(userData));
-      return true;
-    }
-
-    const registeredUsers = JSON.parse(localStorage.getItem("rxvault_registered_users") || "[]");
-    const registeredUser = registeredUsers.find((u: User & { password: string }) => u.email === email && u.password === password);
-    if (registeredUser) {
-      const { password: _, ...userData } = registeredUser;
-      setUser(userData);
-      localStorage.setItem("rxvault_user", JSON.stringify(userData));
-      return true;
-    }
-
-    return false;
-  }, []);
-
-  const register = useCallback(async (name: string, email: string, password: string, role: UserRole, companyName?: string): Promise<boolean> => {
-    const allUsers = [...MOCK_USERS];
-    const registeredUsers = JSON.parse(localStorage.getItem("rxvault_registered_users") || "[]");
-    allUsers.push(...registeredUsers);
-
-    if (allUsers.find(u => u.email === email)) {
-      return false;
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      name,
-      role,
-      companyName,
-      password,
-    };
-
-    registeredUsers.push(newUser);
-    localStorage.setItem("rxvault_registered_users", JSON.stringify(registeredUsers));
-
-    const { password: _, ...userData } = newUser;
-    setUser(userData);
-    localStorage.setItem("rxvault_user", JSON.stringify(userData));
-    return true;
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    localStorage.removeItem("rxvault_user");
-  }, []);
-
-  const addToSearchHistory = useCallback((query: string, medicineId?: string, medicineName?: string) => {
-    const item: SearchHistoryItem = {
-      id: Date.now().toString(),
-      query,
-      timestamp: new Date().toISOString(),
-      medicineId,
-      medicineName,
-    };
-    setSearchHistory(prev => {
-      const updated = [item, ...prev].slice(0, 50);
-      localStorage.setItem("rxvault_search_history", JSON.stringify(updated));
-      return updated;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        // Defer profile fetch to avoid Supabase deadlock
+        setTimeout(() => fetchProfileAndRole(session.user.id), 0);
+      } else {
+        setUser(null);
+        setProfile(null);
+        setRole(null);
+      }
+      setLoading(false);
     });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        fetchProfileAndRole(session.user.id);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfileAndRole]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
   }, []);
 
-  const clearSearchHistory = useCallback(() => {
-    setSearchHistory([]);
-    localStorage.removeItem("rxvault_search_history");
+  const register = useCallback(async (name: string, email: string, password: string, companyName?: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) return { success: false, error: error.message };
+
+    // If company registration, update profile and create company
+    if (companyName && data.user) {
+      await supabase.from("profiles").update({ company_name: companyName }).eq("user_id", data.user.id);
+      await supabase.from("user_roles").update({ role: "company" as any }).eq("user_id", data.user.id);
+      await supabase.from("companies").insert({ name: companyName, owner_id: data.user.id } as any);
+    }
+
+    return { success: true };
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setRole(null);
   }, []);
 
   return (
     <AuthContext.Provider value={{
       user,
+      profile,
+      role,
       isAuthenticated: !!user,
+      loading,
       login,
       register,
       logout,
-      searchHistory,
-      addToSearchHistory,
-      clearSearchHistory,
     }}>
       {children}
     </AuthContext.Provider>

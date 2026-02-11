@@ -14,16 +14,227 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      medicines: {
+        Row: {
+          active_ingredient: string | null
+          category: string
+          company_id: string | null
+          created_at: string
+          description: string
+          dosage: string
+          form: string | null
+          generic_name: string
+          id: string
+          image_url: string | null
+          manufacturer: string
+          name: string
+          price: string
+          requires_prescription: boolean
+          side_effects: string[]
+          sign_language_video_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          active_ingredient?: string | null
+          category: string
+          company_id?: string | null
+          created_at?: string
+          description: string
+          dosage: string
+          form?: string | null
+          generic_name: string
+          id?: string
+          image_url?: string | null
+          manufacturer: string
+          name: string
+          price: string
+          requires_prescription?: boolean
+          side_effects?: string[]
+          sign_language_video_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active_ingredient?: string | null
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          description?: string
+          dosage?: string
+          form?: string | null
+          generic_name?: string
+          id?: string
+          image_url?: string | null
+          manufacturer?: string
+          name?: string
+          price?: string
+          requires_prescription?: boolean
+          side_effects?: string[]
+          sign_language_video_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      search_history: {
+        Row: {
+          created_at: string
+          id: string
+          medicine_id: string | null
+          medicine_name: string | null
+          query: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medicine_id?: string | null
+          medicine_name?: string | null
+          query: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medicine_id?: string | null
+          medicine_name?: string | null
+          query?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_history_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          colorblind_mode: string
+          created_at: string
+          id: string
+          theme: string
+          tts_auto_read: boolean
+          tts_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colorblind_mode?: string
+          created_at?: string
+          id?: string
+          theme?: string
+          tts_auto_read?: boolean
+          tts_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colorblind_mode?: string
+          created_at?: string
+          id?: string
+          theme?: string
+          tts_auto_read?: boolean
+          tts_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_company_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user" | "company"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +361,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user", "company"],
+    },
   },
 } as const
