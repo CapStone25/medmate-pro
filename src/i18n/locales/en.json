@@ -160,7 +160,9 @@
     "edit": "Edit",
     "add": "Add",
     "update": "Update",
-    "search": "Search"
+    "search": "Search",
+    "details": "Details",
+    "translating": "Translating..."
   },
   "medicineDetail": {
     "backToMedicines": "Back to Medicines",

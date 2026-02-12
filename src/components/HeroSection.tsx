@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
@@ -12,6 +13,11 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
   const { t } = useTranslation();
+  const { language } = useSettings();
+
+  const langToBCP47: Record<string, string> = {
+    en: "en-US", ar: "ar-SA", de: "de-DE", fr: "fr-FR", es: "es-ES", tr: "tr-TR",
+  };
 
   const handleSearch = () => {
     if (!query.trim()) return;
@@ -34,7 +40,7 @@ const HeroSection = () => {
       return;
     }
     const recognition = new SpeechRecognitionAPI();
-    recognition.lang = "en-US";
+    recognition.lang = langToBCP47[language] || "en-US";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -49,9 +55,9 @@ const HeroSection = () => {
   };
 
   const features = [
-    { icon: Sparkles, label: "28+ Medicines", desc: "Real pharmaceutical data" },
-    { icon: Shield, label: "Verified Info", desc: "Trusted sources" },
-    { icon: Clock, label: "Instant Search", desc: "Real-time results" },
+    { icon: Sparkles, label: t("home.stats.medicines"), desc: t("home.featuredDesc").slice(0, 25) + "…" },
+    { icon: Shield, label: t("medicineDetail.prescriptionRequired"), desc: t("home.forPatientsDesc").slice(0, 20) + "…" },
+    { icon: Clock, label: t("common.search"), desc: t("medicines.results") },
   ];
 
   return (

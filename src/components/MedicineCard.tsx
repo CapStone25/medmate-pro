@@ -4,17 +4,32 @@ import { getCategoryColor } from "@/utils/medicineImages";
 import { getMedicineImage } from "@/utils/medicineImages";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { ArrowRight, Pill } from "lucide-react";
+import { ArrowRight, Pill, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+interface TranslatedFields {
+  name: string;
+  generic_name: string;
+  description: string;
+  category: string;
+  form: string | null;
+}
 
 interface MedicineCardProps {
   medicine: Medicine;
   index?: number;
+  translated?: TranslatedFields;
+  translating?: boolean;
 }
 
-const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
+const MedicineCard = ({ medicine, index = 0, translated, translating }: MedicineCardProps) => {
   const image = getMedicineImage(medicine.image_url);
   const { t } = useTranslation();
+
+  const displayName = translated?.name || medicine.name;
+  const displayGeneric = translated?.generic_name || medicine.generic_name;
+  const displayDesc = translated?.description || medicine.description;
+  const displayForm = translated?.form || medicine.form;
 
   return (
     <motion.div
@@ -29,7 +44,7 @@ const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
             {image ? (
               <img
                 src={image}
-                alt={medicine.name}
+                alt={displayName}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               />
@@ -49,22 +64,25 @@ const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
           </div>
 
           <div className="p-3 sm:p-4 flex flex-col flex-1">
-            <h3 className="text-base sm:text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors duration-300 mb-0.5 line-clamp-1">
-              {medicine.name}
-            </h3>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-1">{medicine.generic_name}</p>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-base sm:text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors duration-300 mb-0.5 line-clamp-1 flex-1">
+                {displayName}
+              </h3>
+              {translating && <Loader2 className="w-3 h-3 animate-spin text-primary shrink-0" />}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-1">{displayGeneric}</p>
             <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed flex-1">
-              {medicine.description}
+              {displayDesc}
             </p>
             <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border mt-auto">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-primary">{medicine.price}</span>
-                {medicine.form && (
-                  <span className="text-xs text-muted-foreground">· {medicine.form}</span>
+                {displayForm && (
+                  <span className="text-xs text-muted-foreground">· {displayForm}</span>
                 )}
               </div>
               <div className="flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                Details <ArrowRight className="w-4 h-4" />
+                {t("common.details") || "Details"} <ArrowRight className="w-4 h-4" />
               </div>
             </div>
           </div>
