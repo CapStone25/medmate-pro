@@ -12,6 +12,7 @@ import usePageTitle from "@/hooks/usePageTitle";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useTranslatedMedicines } from "@/hooks/useTranslatedMedicine";
 
 const Index = () => {
   usePageTitle("");
@@ -30,6 +31,8 @@ const Index = () => {
     };
     fetchMedicines();
   }, []);
+
+  const { getTranslated, loading: translating } = useTranslatedMedicines(featuredMedicines);
 
   const roles = [
     { icon: Users, title: t("home.forPatients"), desc: t("home.forPatientsDesc"), color: "bg-primary/10 text-primary" },
@@ -77,7 +80,13 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10">
             {featuredMedicines.map((medicine, i) => (
-              <MedicineCard key={medicine.id} medicine={medicine} index={i} />
+              <MedicineCard
+                key={medicine.id}
+                medicine={medicine}
+                index={i}
+                translated={getTranslated(medicine.id)}
+                translating={translating}
+              />
             ))}
           </div>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
