@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { languages } from "@/i18n";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const Navbar = () => {
   const { profile, role, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { language, setLanguage } = useSettings();
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const navLinks = [
     { to: "/", label: t("nav.home") },
@@ -91,7 +104,44 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
+          {/* Language Switcher */}
+          <div ref={langRef} className="relative">
+            <button
+              onClick={() => setLangOpen(!langOpen)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-300"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="text-xs">{languages.find(l => l.code === language)?.flag}</span>
+            </button>
+            <AnimatePresence>
+              {langOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-44 rounded-xl bg-card border border-border shadow-card-hover overflow-hidden z-50"
+                >
+                  {languages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { setLanguage(lang.code); setLangOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                        language === lang.code
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      <span className="text-base">{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link to={getDashboardLink()}>
@@ -170,7 +220,28 @@ const Navbar = () => {
                   </Link>
                 </>
               )}
-              <div className="border-t border-border pt-3 mt-2 flex flex-col gap-2">
+              {/* Mobile Language Switcher */}
+              <div className="border-t border-border pt-3 mt-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">{t("settings.language")}</p>
+                <div className="flex flex-wrap gap-1.5 px-3 mb-3">
+                  {languages.map(lang => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { setLanguage(lang.code); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        language === lang.code
+                          ? "bg-primary/10 text-primary border border-primary/20"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-border pt-3 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <>
                     <span className="text-sm text-muted-foreground px-3">{t("nav.signedInAs", { name: profile?.name })}</span>
