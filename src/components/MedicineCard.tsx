@@ -5,6 +5,7 @@ import { getMedicineImage } from "@/utils/medicineImages";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { ArrowRight, Pill } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface MedicineCardProps {
   medicine: Medicine;
@@ -13,6 +14,7 @@ interface MedicineCardProps {
 
 const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
   const image = getMedicineImage(medicine.image_url);
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -41,7 +43,7 @@ const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
               variant={medicine.requires_prescription ? "default" : "secondary"}
               className="absolute top-3 right-3 text-xs backdrop-blur-sm"
             >
-              {medicine.requires_prescription ? "Rx Required" : "OTC"}
+              {medicine.requires_prescription ? t("medicineDetail.rxRequired") : t("medicineDetail.otc")}
             </Badge>
             <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getCategoryColor(medicine.category)}`} />
           </div>

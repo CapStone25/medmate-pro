@@ -161,5 +161,30 @@
     "add": "Ekle",
     "update": "Güncelle",
     "search": "Ara"
+  },
+  "medicineDetail": {
+    "backToMedicines": "İlaçlara dön",
+    "notFound": "İlaç bulunamadı",
+    "notFoundDesc": "Aradığınız ilaç mevcut değil.",
+    "browseMedicines": "İlaçlara göz at",
+    "prescriptionRequired": "Reçete gerekli",
+    "overTheCounter": "Reçetesiz",
+    "readAloud": "Sesli oku",
+    "stopReading": "Okumayı durdur",
+    "loadingAudio": "Yükleniyor...",
+    "hideSignLanguage": "İşaret dilini gizle",
+    "showSignLanguage": "İşaret dilini göster",
+    "signLanguageExplanation": "İşaret dili açıklaması",
+    "dosage": "Dozaj",
+    "manufacturer": "Üretici",
+    "price": "Fiyat",
+    "activeIngredient": "Aktif madde",
+    "form": "Form",
+    "description": "Açıklama",
+    "sideEffects": "Yan etkiler",
+    "relatedMedicines": "İlgili ilaçlar",
+    "rxRequired": "Reçeteli",
+    "otc": "Reçetesiz",
+    "readAloudText": "{{name}}. Jenerik adı: {{generic}}. {{description}}. Dozaj: {{dosage}}. Fiyat: {{price}}. Yan etkiler şunlardır: {{sideEffects}}."
   }
 }

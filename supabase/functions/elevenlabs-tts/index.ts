@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, language } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
@@ -25,8 +25,18 @@ serve(async (req) => {
       });
     }
 
-    // Use Sarah voice by default - clear, professional female voice
+    // Use multilingual v2 model for proper multi-language support
     const selectedVoice = voiceId || "EXAVITQu4vr4xnSDxMaL";
+
+    // Map language codes to ElevenLabs language codes
+    const langMap: Record<string, string> = {
+      en: "en",
+      ar: "ar",
+      de: "de",
+      fr: "fr",
+      es: "es",
+      tr: "tr",
+    };
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}/stream?output_format=mp3_44100_128`,
@@ -38,7 +48,8 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           text: text.substring(0, 5000),
-          model_id: "eleven_turbo_v2_5",
+          model_id: "eleven_multilingual_v2",
+          language_code: langMap[language || "en"] || "en",
           voice_settings: {
             stability: 0.6,
             similarity_boost: 0.75,
