@@ -161,5 +161,30 @@
     "add": "Hinzufügen",
     "update": "Aktualisieren",
     "search": "Suchen"
+  },
+  "medicineDetail": {
+    "backToMedicines": "Zurück zu Medikamenten",
+    "notFound": "Medikament nicht gefunden",
+    "notFoundDesc": "Das gesuchte Medikament existiert nicht.",
+    "browseMedicines": "Medikamente durchsuchen",
+    "prescriptionRequired": "Rezeptpflichtig",
+    "overTheCounter": "Rezeptfrei",
+    "readAloud": "Vorlesen",
+    "stopReading": "Vorlesen stoppen",
+    "loadingAudio": "Laden...",
+    "hideSignLanguage": "Gebärdensprache ausblenden",
+    "showSignLanguage": "Gebärdensprache anzeigen",
+    "signLanguageExplanation": "Gebärdensprache-Erklärung",
+    "dosage": "Dosierung",
+    "manufacturer": "Hersteller",
+    "price": "Preis",
+    "activeIngredient": "Wirkstoff",
+    "form": "Darreichungsform",
+    "description": "Beschreibung",
+    "sideEffects": "Nebenwirkungen",
+    "relatedMedicines": "Verwandte Medikamente",
+    "rxRequired": "Rezeptpflichtig",
+    "otc": "Rezeptfrei",
+    "readAloudText": "{{name}}. Generischer Name: {{generic}}. {{description}}. Dosierung: {{dosage}}. Preis: {{price}}. Nebenwirkungen sind: {{sideEffects}}."
   }
 }

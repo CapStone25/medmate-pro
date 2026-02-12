@@ -1,8 +1,17 @@
 import { useState, useRef, useCallback } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 
+const langToBCP47: Record<string, string> = {
+  en: "en-US",
+  ar: "ar-SA",
+  de: "de-DE",
+  fr: "fr-FR",
+  es: "es-ES",
+  tr: "tr-TR",
+};
+
 export const useTextToSpeech = () => {
-  const { ttsEnabled } = useSettings();
+  const { ttsEnabled, language } = useSettings();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -10,7 +19,6 @@ export const useTextToSpeech = () => {
   const speak = useCallback(async (text: string) => {
     if (!ttsEnabled || !text) return;
 
-    // Stop any current playback
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -26,7 +34,7 @@ export const useTextToSpeech = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, language }),
         }
       );
 
@@ -50,9 +58,10 @@ export const useTextToSpeech = () => {
       await audio.play();
     } catch (e) {
       console.error("TTS error:", e);
-      // Fallback to browser TTS
+      // Fallback to browser TTS with correct language
       if ("speechSynthesis" in window) {
         const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = langToBCP47[language] || "en-US";
         utterance.rate = 0.9;
         utterance.onend = () => setIsSpeaking(false);
         speechSynthesis.speak(utterance);
@@ -61,7 +70,7 @@ export const useTextToSpeech = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [ttsEnabled]);
+  }, [ttsEnabled, language]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {

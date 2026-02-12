@@ -161,5 +161,30 @@
     "add": "إضافة",
     "update": "تحديث",
     "search": "بحث"
+  },
+  "medicineDetail": {
+    "backToMedicines": "العودة للأدوية",
+    "notFound": "الدواء غير موجود",
+    "notFoundDesc": "الدواء الذي تبحث عنه غير موجود.",
+    "browseMedicines": "تصفح الأدوية",
+    "prescriptionRequired": "يتطلب وصفة طبية",
+    "overTheCounter": "بدون وصفة طبية",
+    "readAloud": "اقرأ بصوت عالٍ",
+    "stopReading": "إيقاف القراءة",
+    "loadingAudio": "جاري التحميل...",
+    "hideSignLanguage": "إخفاء لغة الإشارة",
+    "showSignLanguage": "عرض لغة الإشارة",
+    "signLanguageExplanation": "شرح بلغة الإشارة",
+    "dosage": "الجرعة",
+    "manufacturer": "الشركة المصنعة",
+    "price": "السعر",
+    "activeIngredient": "المادة الفعالة",
+    "form": "الشكل الدوائي",
+    "description": "الوصف",
+    "sideEffects": "الآثار الجانبية",
+    "relatedMedicines": "أدوية ذات صلة",
+    "rxRequired": "يتطلب وصفة",
+    "otc": "بدون وصفة",
+    "readAloudText": "{{name}}. الاسم العام: {{generic}}. {{description}}. الجرعة: {{dosage}}. السعر: {{price}}. الآثار الجانبية تشمل: {{sideEffects}}."
   }
 }

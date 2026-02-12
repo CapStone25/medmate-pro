@@ -161,5 +161,30 @@
     "add": "Add",
     "update": "Update",
     "search": "Search"
+  },
+  "medicineDetail": {
+    "backToMedicines": "Back to Medicines",
+    "notFound": "Medicine not found",
+    "notFoundDesc": "The medicine you're looking for doesn't exist.",
+    "browseMedicines": "Browse Medicines",
+    "prescriptionRequired": "Prescription Required",
+    "overTheCounter": "Over the Counter",
+    "readAloud": "Read Aloud",
+    "stopReading": "Stop Reading",
+    "loadingAudio": "Loading...",
+    "hideSignLanguage": "Hide Sign Language",
+    "showSignLanguage": "Show Sign Language",
+    "signLanguageExplanation": "Sign Language Explanation",
+    "dosage": "Dosage",
+    "manufacturer": "Manufacturer",
+    "price": "Price",
+    "activeIngredient": "Active Ingredient",
+    "form": "Form",
+    "description": "Description",
+    "sideEffects": "Side Effects",
+    "relatedMedicines": "Related Medicines",
+    "rxRequired": "Rx Required",
+    "otc": "OTC",
+    "readAloudText": "{{name}}. Generic name: {{generic}}. {{description}}. Dosage: {{dosage}}. Price: {{price}}. Side effects include: {{sideEffects}}."
   }
 }
