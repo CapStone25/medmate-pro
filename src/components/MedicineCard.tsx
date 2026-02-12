@@ -22,8 +22,8 @@ const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
     >
       <Link to={`/medicine/${medicine.id}`}>
-        <div className="group relative bg-card rounded-2xl border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1">
-          <div className="relative h-48 overflow-hidden bg-muted">
+        <div className="group relative bg-card rounded-2xl border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-1 h-full flex flex-col">
+          <div className="relative h-36 sm:h-48 overflow-hidden bg-muted">
             {image ? (
               <img
                 src={image}
@@ -46,15 +46,15 @@ const MedicineCard = ({ medicine, index = 0 }: MedicineCardProps) => {
             <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getCategoryColor(medicine.category)}`} />
           </div>
 
-          <div className="p-4">
-            <h3 className="text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors duration-300 mb-0.5 line-clamp-1">
+          <div className="p-3 sm:p-4 flex flex-col flex-1">
+            <h3 className="text-base sm:text-lg font-bold font-display text-foreground group-hover:text-primary transition-colors duration-300 mb-0.5 line-clamp-1">
               {medicine.name}
             </h3>
-            <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{medicine.generic_name}</p>
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-1">{medicine.generic_name}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed flex-1">
               {medicine.description}
             </p>
-            <div className="flex items-center justify-between pt-3 border-t border-border">
+            <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border mt-auto">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-primary">{medicine.price}</span>
                 {medicine.form && (
