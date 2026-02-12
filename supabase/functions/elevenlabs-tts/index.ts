@@ -36,6 +36,8 @@ serve(async (req) => {
       fr: "fr",
       es: "es",
       tr: "tr",
+      ja: "ja",
+      pt: "pt",
     };
 
     const response = await fetch(

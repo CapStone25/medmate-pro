@@ -8,6 +8,8 @@ import de from "./locales/de.json";
 import fr from "./locales/fr.json";
 import es from "./locales/es.json";
 import tr from "./locales/tr.json";
+import ja from "./locales/ja.json";
+import pt from "./locales/pt.json";
 
 export const languages = [
   { code: "en", label: "English", flag: "🇬🇧", dir: "ltr" },
@@ -16,6 +18,8 @@ export const languages = [
   { code: "fr", label: "Français", flag: "🇫🇷", dir: "ltr" },
   { code: "es", label: "Español", flag: "🇪🇸", dir: "ltr" },
   { code: "tr", label: "Türkçe", flag: "🇹🇷", dir: "ltr" },
+  { code: "ja", label: "日本語", flag: "🇯🇵", dir: "ltr" },
+  { code: "pt", label: "Português", flag: "🇵🇹", dir: "ltr" },
 ] as const;
 
 i18n
@@ -29,6 +33,8 @@ i18n
       fr: { translation: fr },
       es: { translation: es },
       tr: { translation: tr },
+      ja: { translation: ja },
+      pt: { translation: pt },
     },
     fallbackLng: "en",
     interpolation: { escapeValue: false },
