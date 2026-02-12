@@ -8,6 +8,7 @@ import { Pill, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePageTitle from "@/hooks/usePageTitle";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -17,15 +18,16 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  usePageTitle("Create Account");
+  usePageTitle(t("register.createAccount"));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const result = await register(name, email, password);
     if (result.success) {
-      toast.success("Account created successfully!");
+      toast.success(t("register.success"));
       navigate("/");
     } else {
       toast.error(result.error || "Registration failed");
@@ -44,10 +46,8 @@ const Register = () => {
             className="w-24 h-24 rounded-3xl gradient-accent flex items-center justify-center mx-auto mb-8 shadow-glow-accent">
             <Pill className="w-12 h-12 text-accent-foreground" />
           </motion.div>
-          <h2 className="text-3xl font-bold font-display text-primary-foreground mb-4">Join RxVault Today</h2>
-          <p className="text-primary-foreground/70 max-w-sm">
-            Create your account and start exploring our comprehensive medicine database.
-          </p>
+          <h2 className="text-3xl font-bold font-display text-primary-foreground mb-4">{t("login.heroTitle")}</h2>
+          <p className="text-primary-foreground/70 max-w-sm">{t("login.heroDesc")}</p>
         </div>
       </div>
 
@@ -60,22 +60,22 @@ const Register = () => {
             <span className="text-xl font-bold font-display text-gradient">RxVault</span>
           </Link>
 
-          <h1 className="text-3xl font-bold font-display text-foreground mb-2">Create account</h1>
-          <p className="text-muted-foreground mb-8">Sign up as a patient to get started</p>
+          <h1 className="text-3xl font-bold font-display text-foreground mb-2">{t("register.createAccount")}</h1>
+          <p className="text-muted-foreground mb-8">{t("register.joinUs")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t("register.fullName")}</Label>
               <Input id="name" placeholder="Enter your name" value={name}
                 onChange={e => setName(e.target.value)} required className="h-12 rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("register.email")}</Label>
               <Input id="email" type="email" placeholder="name@example.com" value={email}
                 onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("register.password")}</Label>
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"}
                   placeholder="Create a password (min 6 chars)" value={password}
@@ -87,19 +87,14 @@ const Register = () => {
               </div>
             </div>
             <Button type="submit" className="w-full h-12 rounded-xl text-base gap-2 group" disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? t("register.creating") : t("register.createAccount")}
               {!loading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary font-medium hover:underline">Sign in</Link>
-          </p>
-
-          <p className="text-center text-xs text-muted-foreground mt-4">
-            Company accounts are created by administrators.{" "}
-            <Link to="/login" className="text-primary hover:underline">Contact us</Link> if you represent a pharmaceutical company.
+            {t("register.haveAccount")}{" "}
+            <Link to="/login" className="text-primary font-medium hover:underline">{t("register.signIn")}</Link>
           </p>
         </motion.div>
       </div>

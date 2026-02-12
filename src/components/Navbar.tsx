@@ -4,17 +4,19 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/medicines", label: "Medicines" },
-];
+import { useTranslation } from "react-i18next";
 
 const Navbar = () => {
   const { profile, role, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
+
+  const navLinks = [
+    { to: "/", label: t("nav.home") },
+    { to: "/medicines", label: t("nav.medicines") },
+  ];
 
   const handleLogout = async () => {
     await logout();
@@ -73,7 +75,7 @@ const Navbar = () => {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
-                Dashboard
+                {t("nav.dashboard")}
               </Link>
               <Link
                 to="/settings"
@@ -102,16 +104,16 @@ const Navbar = () => {
               </Link>
               <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 rounded-lg">
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t("nav.logout")}
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Link to="/login">
-                <Button variant="ghost" size="sm" className="rounded-lg">Sign In</Button>
+                <Button variant="ghost" size="sm" className="rounded-lg">{t("nav.signIn")}</Button>
               </Link>
               <Link to="/register">
-                <Button size="sm" className="rounded-lg">Get Started</Button>
+                <Button size="sm" className="rounded-lg">{t("nav.getStarted")}</Button>
               </Link>
             </div>
           )}
@@ -157,32 +159,32 @@ const Navbar = () => {
                       isActive(getDashboardLink()) ? "text-primary bg-primary/8" : "text-foreground"
                     }`}
                   >
-                    <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    <LayoutDashboard className="w-4 h-4" /> {t("nav.dashboard")}
                   </Link>
                   <Link
                     to="/settings"
                     onClick={() => setMobileOpen(false)}
                     className="py-2.5 px-3 rounded-lg text-sm font-medium flex items-center gap-2 text-foreground"
                   >
-                    <Settings className="w-4 h-4" /> Settings
+                    <Settings className="w-4 h-4" /> {t("nav.settings")}
                   </Link>
                 </>
               )}
               <div className="border-t border-border pt-3 mt-2 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <>
-                    <span className="text-sm text-muted-foreground px-3">Signed in as {profile?.name}</span>
+                    <span className="text-sm text-muted-foreground px-3">{t("nav.signedInAs", { name: profile?.name })}</span>
                     <Button variant="outline" size="sm" onClick={() => { handleLogout(); setMobileOpen(false); }}>
-                      Logout
+                      {t("nav.logout")}
                     </Button>
                   </>
                 ) : (
                   <div className="flex gap-2">
                     <Link to="/login" onClick={() => setMobileOpen(false)} className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+                      <Button variant="outline" size="sm" className="w-full">{t("nav.signIn")}</Button>
                     </Link>
                     <Link to="/register" onClick={() => setMobileOpen(false)} className="flex-1">
-                      <Button size="sm" className="w-full">Get Started</Button>
+                      <Button size="sm" className="w-full">{t("nav.getStarted")}</Button>
                     </Link>
                   </div>
                 )}

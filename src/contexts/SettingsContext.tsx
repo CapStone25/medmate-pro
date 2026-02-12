@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
+import { useTranslation } from "react-i18next";
+import { languages } from "@/i18n";
 
 export type ColorBlindMode = "none" | "protanopia" | "deuteranopia" | "tritanopia" | "achromatopsia";
 
@@ -9,10 +11,12 @@ interface SettingsContextType {
   ttsEnabled: boolean;
   ttsAutoRead: boolean;
   colorBlindMode: ColorBlindMode;
+  language: string;
   setTheme: (theme: "light" | "dark") => void;
   setTtsEnabled: (enabled: boolean) => void;
   setTtsAutoRead: (enabled: boolean) => void;
   setColorBlindMode: (mode: ColorBlindMode) => void;
+  setLanguage: (lang: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -27,6 +31,7 @@ const colorBlindFilters: Record<ColorBlindMode, string> = {
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
+  const { i18n } = useTranslation();
   const [theme, setThemeState] = useState<"light" | "dark">(() => {
     const saved = localStorage.getItem("rxvault_theme");
     return (saved as "light" | "dark") || "light";
@@ -34,6 +39,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [ttsEnabled, setTtsEnabledState] = useState(true);
   const [ttsAutoRead, setTtsAutoReadState] = useState(false);
   const [colorBlindMode, setColorBlindModeState] = useState<ColorBlindMode>("none");
+  const [language, setLanguageState] = useState(() => {
+    return localStorage.getItem("rxvault_language") || "en";
+  });
 
   // Apply theme
   useEffect(() => {
@@ -46,6 +54,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const filter = colorBlindFilters[colorBlindMode];
     document.documentElement.style.filter = filter === "none" ? "" : filter;
   }, [colorBlindMode]);
+
+  // Apply language direction (RTL for Arabic)
+  useEffect(() => {
+    const lang = languages.find(l => l.code === language);
+    document.documentElement.dir = lang?.dir || "ltr";
+    document.documentElement.lang = language;
+    i18n.changeLanguage(language);
+    localStorage.setItem("rxvault_language", language);
+  }, [language, i18n]);
 
   // Load settings from DB
   useEffect(() => {
@@ -62,6 +79,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setTtsEnabledState(settings.tts_enabled);
           setTtsAutoReadState(settings.tts_auto_read);
           setColorBlindModeState(settings.colorblind_mode as ColorBlindMode);
+          if (settings.language) setLanguageState(settings.language);
         }
       });
   }, [isAuthenticated, user]);
@@ -91,10 +109,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     saveSettings({ colorblind_mode: mode });
   }, [saveSettings]);
 
+  const setLanguage = useCallback((lang: string) => {
+    setLanguageState(lang);
+    saveSettings({ language: lang });
+  }, [saveSettings]);
+
   return (
     <SettingsContext.Provider value={{
-      theme, ttsEnabled, ttsAutoRead, colorBlindMode,
-      setTheme, setTtsEnabled, setTtsAutoRead, setColorBlindMode,
+      theme, ttsEnabled, ttsAutoRead, colorBlindMode, language,
+      setTheme, setTtsEnabled, setTtsAutoRead, setColorBlindMode, setLanguage,
     }}>
       {/* SVG Filters for color blindness */}
       <svg style={{ position: "absolute", width: 0, height: 0 }}>

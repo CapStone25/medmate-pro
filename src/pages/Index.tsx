@@ -11,9 +11,11 @@ import { motion } from "framer-motion";
 import usePageTitle from "@/hooks/usePageTitle";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
   usePageTitle("");
+  const { t } = useTranslation();
   const [featuredMedicines, setFeaturedMedicines] = useState<Medicine[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -30,16 +32,16 @@ const Index = () => {
   }, []);
 
   const roles = [
-    { icon: Users, title: "For Patients", desc: "Search medicines, track your history, and access detailed prescription information.", color: "bg-primary/10 text-primary" },
-    { icon: Building2, title: "For Companies", desc: "Add and manage prescriptions. Reach patients with accurate medicine information.", color: "bg-accent/10 text-accent" },
-    { icon: Shield, title: "For Admins", desc: "Full control over users, companies, and the medicine database.", color: "bg-secondary text-secondary-foreground" },
+    { icon: Users, title: t("home.forPatients"), desc: t("home.forPatientsDesc"), color: "bg-primary/10 text-primary" },
+    { icon: Building2, title: t("home.forCompanies"), desc: t("home.forCompaniesDesc"), color: "bg-accent/10 text-accent" },
+    { icon: Shield, title: t("home.forAdmins"), desc: t("home.forAdminsDesc"), color: "bg-secondary text-secondary-foreground" },
   ];
 
   const stats = [
-    { value: totalCount || 28, suffix: "+", label: "Medicines", icon: TrendingUp },
-    { value: 5000, suffix: "+", label: "Users", icon: Users },
-    { value: 150, suffix: "+", label: "Companies", icon: Building2 },
-    { value: 4.9, suffix: "/5", label: "Rating", icon: Star, isDecimal: true },
+    { value: totalCount || 28, suffix: "+", label: t("home.stats.medicines"), icon: TrendingUp },
+    { value: 5000, suffix: "+", label: t("home.stats.users"), icon: Users },
+    { value: 150, suffix: "+", label: t("home.stats.companies"), icon: Building2 },
+    { value: 4.9, suffix: "/5", label: t("home.stats.rating"), icon: Star, isDecimal: true },
   ];
 
   return (
@@ -69,9 +71,9 @@ const Index = () => {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">Explore</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">Featured Medicines</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">Discover our most searched medicines with detailed information and dosage guidelines.</p>
+            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">{t("home.explore")}</span>
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">{t("home.featuredMedicines")}</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">{t("home.featuredDesc")}</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             {featuredMedicines.map((medicine, i) => (
@@ -81,7 +83,7 @@ const Index = () => {
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center">
             <Link to="/medicines">
               <Button variant="outline" size="lg" className="gap-2 rounded-xl group">
-                View All Medicines <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                {t("home.viewAll")} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
           </motion.div>
@@ -91,9 +93,9 @@ const Index = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">For Everyone</span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">Built for Three Roles</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">Whether you're a patient, a pharmaceutical company, or an administrator — RxVault has you covered.</p>
+            <span className="inline-block text-sm font-medium text-primary uppercase tracking-wider mb-2 px-3 py-1 rounded-full bg-primary/8 border border-primary/15">{t("home.forEveryone")}</span>
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-foreground mt-3 mb-4">{t("home.builtForThree")}</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">{t("home.builtForThreeDesc")}</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {roles.map((r, i) => (
@@ -118,16 +120,16 @@ const Index = () => {
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-accent/15 blur-3xl" />
             <div className="relative z-10">
-              <h2 className="text-3xl sm:text-4xl font-bold font-display text-primary-foreground mb-4">Start Your Health Journey</h2>
-              <p className="text-primary-foreground/70 mb-8 max-w-lg mx-auto">Join thousands of users who trust RxVault for accurate medicine information.</p>
+              <h2 className="text-3xl sm:text-4xl font-bold font-display text-primary-foreground mb-4">{t("home.startJourney")}</h2>
+              <p className="text-primary-foreground/70 mb-8 max-w-lg mx-auto">{t("home.startJourneyDesc")}</p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link to="/register">
                   <Button variant="accent" size="lg" className="rounded-xl gap-2 group">
-                    Create Free Account <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    {t("hero.createAccount")} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
                 <Link to="/medicines">
-                  <Button variant="hero-outline" size="lg" className="rounded-xl">Browse Medicines</Button>
+                  <Button variant="hero-outline" size="lg" className="rounded-xl">{t("hero.browseMedicines")}</Button>
                 </Link>
               </div>
             </div>

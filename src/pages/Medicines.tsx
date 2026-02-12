@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/usePageTitle";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { useTranslation } from "react-i18next";
 
 const Medicines = () => {
   const [searchParams] = useSearchParams();
@@ -22,8 +23,9 @@ const Medicines = () => {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
-  usePageTitle("Medicine Catalog");
+  usePageTitle(t("medicines.catalog"));
 
   useEffect(() => {
     const fetchMedicines = async () => {
@@ -69,18 +71,18 @@ const Medicines = () => {
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
+              <ArrowLeft className="w-4 h-4" /> {t("medicines.backToHome")}
             </Link>
             <div className="flex items-end justify-between flex-wrap gap-4">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold font-display text-foreground mb-2">Medicine Catalog</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold font-display text-foreground mb-2">{t("medicines.catalog")}</h1>
                 <p className="text-muted-foreground">
-                  Browse our database of <span className="font-semibold text-foreground">{medicines.length}</span> medicines
+                  {t("medicines.browsing", { count: medicines.length })}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-4 py-2">
                 <Search className="w-4 h-4" />
-                <span><span className="font-semibold text-foreground"><AnimatedCounter value={filteredMedicines.length} duration={0.5} /></span> results</span>
+                <span><span className="font-semibold text-foreground"><AnimatedCounter value={filteredMedicines.length} duration={0.5} /></span> {t("medicines.results")}</span>
               </div>
             </div>
           </motion.div>
@@ -89,13 +91,13 @@ const Medicines = () => {
             <div className="flex gap-3">
               <form onSubmit={handleSearch} className="relative flex-1 max-w-xl">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input type="text" placeholder="Search by name, category, or description..."
+                <input type="text" placeholder={t("medicines.searchPlaceholder")}
                   value={query} onChange={e => setQuery(e.target.value)}
                   className="w-full bg-card border border-border rounded-xl pl-12 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow" />
               </form>
               <Button variant="outline" className="rounded-xl gap-2 shrink-0" onClick={() => setShowFilters(!showFilters)}>
                 <SlidersHorizontal className="w-4 h-4" />
-                <span className="hidden sm:inline">Filters</span>
+                <span className="hidden sm:inline">{t("medicines.filters")}</span>
               </Button>
             </div>
             <AnimatePresence>
@@ -142,9 +144,9 @@ const Medicines = () => {
               ) : (
                 <motion.div key="empty" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="text-center py-20">
                   <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mx-auto mb-6 text-4xl">🔍</div>
-                  <h3 className="text-xl font-semibold font-display text-foreground mb-2">No medicines found</h3>
-                  <p className="text-muted-foreground mb-6">Try adjusting your search or filter criteria</p>
-                  <Button variant="outline" onClick={clearFilters} className="rounded-xl">Clear All Filters</Button>
+                  <h3 className="text-xl font-semibold font-display text-foreground mb-2">{t("medicines.noResults")}</h3>
+                  <p className="text-muted-foreground mb-6">{t("medicines.noResultsDesc")}</p>
+                  <Button variant="outline" onClick={clearFilters} className="rounded-xl">{t("medicines.clearFilters")}</Button>
                 </motion.div>
               )}
             </AnimatePresence>
