@@ -8,6 +8,8 @@ const langToBCP47: Record<string, string> = {
   fr: "fr-FR",
   es: "es-ES",
   tr: "tr-TR",
+  ja: "ja-JP",
+  pt: "pt-PT",
 };
 
 export const useTextToSpeech = () => {

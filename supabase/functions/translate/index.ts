@@ -28,6 +28,8 @@ serve(async (req) => {
       fr: "French",
       es: "Spanish",
       tr: "Turkish",
+      ja: "Japanese",
+      pt: "Portuguese",
     };
 
     const langName = langNames[targetLang] || "English";
