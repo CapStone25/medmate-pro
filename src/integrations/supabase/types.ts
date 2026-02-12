@@ -191,6 +191,7 @@ export type Database = {
           colorblind_mode: string
           created_at: string
           id: string
+          language: string
           theme: string
           tts_auto_read: boolean
           tts_enabled: boolean
@@ -201,6 +202,7 @@ export type Database = {
           colorblind_mode?: string
           created_at?: string
           id?: string
+          language?: string
           theme?: string
           tts_auto_read?: boolean
           tts_enabled?: boolean
@@ -211,6 +213,7 @@ export type Database = {
           colorblind_mode?: string
           created_at?: string
           id?: string
+          language?: string
           theme?: string
           tts_auto_read?: boolean
           tts_enabled?: boolean

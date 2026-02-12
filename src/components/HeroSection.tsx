@@ -4,12 +4,14 @@ import { Search, Mic, MicOff, Sparkles, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useTranslation } from "react-i18next";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
+  const { t } = useTranslation();
 
   const handleSearch = () => {
     if (!query.trim()) return;
@@ -67,25 +69,25 @@ const HeroSection = () => {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 text-primary-foreground text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
-              Your Digital Prescription Companion
+              {t("hero.badge")}
             </span>
           </motion.div>
 
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display leading-tight mb-6 text-primary-foreground">
-            Find Your Medicine,{" "}<span className="text-gradient-accent">Instantly</span>
+            {t("hero.title")}{" "}<span className="text-gradient-accent">{t("hero.titleHighlight")}</span>
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg sm:text-xl text-primary-foreground/70 mb-10 max-w-2xl mx-auto">
-            Search our comprehensive database with detailed information, dosage guides, and side effects. Use voice or text to find what you need.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
             className="max-w-2xl mx-auto">
             <div className="relative flex items-center glass-strong rounded-2xl p-2 shadow-card-hover">
               <Search className="absolute left-5 w-5 h-5 text-muted-foreground" />
-              <input type="text" placeholder="Search medicines, conditions, or categories..."
+              <input type="text" placeholder={t("medicines.searchPlaceholder")}
                 value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent pl-12 pr-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none text-base" />
               <div className="flex items-center gap-2">
@@ -94,7 +96,7 @@ const HeroSection = () => {
                   title="Voice search">
                   {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
-                <Button onClick={handleSearch} className="rounded-xl px-6">Search</Button>
+                <Button onClick={handleSearch} className="rounded-xl px-6">{t("common.search")}</Button>
               </div>
             </div>
             {isListening && (

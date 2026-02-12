@@ -8,6 +8,7 @@ import { Pill, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePageTitle from "@/hooks/usePageTitle";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,15 +17,16 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  usePageTitle("Sign In");
+  usePageTitle(t("login.signIn"));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const result = await login(email, password);
     if (result.success) {
-      toast.success("Welcome back!");
+      toast.success(t("login.welcomeMsg"));
       navigate("/");
     } else {
       toast.error(result.error || "Invalid email or password");
@@ -45,17 +47,17 @@ const Login = () => {
             <span className="text-xl font-bold font-display text-gradient">RxVault</span>
           </Link>
 
-          <h1 className="text-3xl font-bold font-display text-foreground mb-2">Welcome back</h1>
-          <p className="text-muted-foreground mb-8">Sign in to access your account</p>
+          <h1 className="text-3xl font-bold font-display text-foreground mb-2">{t("login.welcomeBack")}</h1>
+          <p className="text-muted-foreground mb-8">{t("login.signInDesc")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("login.email")}</Label>
               <Input id="email" type="email" placeholder="name@example.com" value={email}
                 onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password"
                   value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-xl pr-12" />
@@ -66,23 +68,23 @@ const Login = () => {
               </div>
             </div>
             <Button type="submit" className="w-full h-12 rounded-xl text-base gap-2 group" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t("login.signingIn") : t("login.signIn")}
               {!loading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">Create one</Link>
+            {t("login.noAccount")}{" "}
+            <Link to="/register" className="text-primary font-medium hover:underline">{t("login.createOne")}</Link>
           </p>
 
           <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-xs font-medium text-foreground mb-3">Demo Accounts:</p>
+            <p className="text-xs font-medium text-foreground mb-3">{t("login.demoAccounts")}</p>
             <div className="flex flex-wrap gap-2">
               {[
-                { label: "👤 User", email: "user@rxvault.com", pw: "User123!" },
-                { label: "🏢 Company", email: "company@evapharma.com", pw: "Company123!" },
-                { label: "🛡️ Admin", email: "admin@rxvault.com", pw: "Admin123!" },
+                { label: "🛡️ Admin", email: "abdalraheemahmed@gmail.com", pw: "12345" },
+                { label: "🏢 Ahmed Ezzat", email: "AhmedEzzat@gmail.com", pw: "12345" },
+                { label: "🏢 Felopater", email: "FelopaterRemon@gmail.com", pw: "12345" },
               ].map(demo => (
                 <button key={demo.label} type="button" onClick={() => fillDemoAccount(demo.email, demo.pw)}
                   className="text-xs px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all duration-200">
@@ -103,10 +105,8 @@ const Login = () => {
             className="w-24 h-24 rounded-3xl gradient-accent flex items-center justify-center mx-auto mb-8 shadow-glow-accent">
             <Pill className="w-12 h-12 text-accent-foreground" />
           </motion.div>
-          <h2 className="text-3xl font-bold font-display text-primary-foreground mb-4">Your Health, Simplified</h2>
-          <p className="text-primary-foreground/70 max-w-sm">
-            Access medicines, manage prescriptions, and stay informed about your health.
-          </p>
+          <h2 className="text-3xl font-bold font-display text-primary-foreground mb-4">{t("login.heroTitle")}</h2>
+          <p className="text-primary-foreground/70 max-w-sm">{t("login.heroDesc")}</p>
         </div>
       </div>
     </div>
