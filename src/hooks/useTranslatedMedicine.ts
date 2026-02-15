@@ -2,8 +2,46 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Medicine } from "@/types";
 import { useSettings } from "@/contexts/SettingsContext";
 
+// Normalize language code to 2-char (e.g., "en-US" -> "en", "pt-BR" -> "pt")
+function normalizeLang(lang: string): string {
+  return lang?.split("-")[0]?.toLowerCase() || "en";
+}
+
 // In-memory cache: lang -> medicineId -> translated fields
 const translationCache = new Map<string, Map<string, TranslatedFields>>();
+
+// localStorage persistence key prefix
+const CACHE_PREFIX = "rxvault_tr_";
+
+function loadCacheFromStorage(lang: string): Map<string, TranslatedFields> | null {
+  try {
+    const stored = localStorage.getItem(`${CACHE_PREFIX}${lang}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return new Map(Object.entries(parsed));
+    }
+  } catch {}
+  return null;
+}
+
+function saveCacheToStorage(lang: string) {
+  try {
+    const langCache = translationCache.get(lang);
+    if (langCache && langCache.size > 0) {
+      const obj: Record<string, TranslatedFields> = {};
+      langCache.forEach((v, k) => { obj[k] = v; });
+      localStorage.setItem(`${CACHE_PREFIX}${lang}`, JSON.stringify(obj));
+    }
+  } catch {}
+}
+
+function ensureLangCache(lang: string): Map<string, TranslatedFields> {
+  if (!translationCache.has(lang)) {
+    const stored = loadCacheFromStorage(lang);
+    translationCache.set(lang, stored || new Map());
+  }
+  return translationCache.get(lang)!;
+}
 
 interface TranslatedFields {
   name: string;
@@ -32,7 +70,8 @@ function getOriginalFields(m: Medicine): TranslatedFields {
 }
 
 export function useTranslatedMedicine(medicine: Medicine | null) {
-  const { language } = useSettings();
+  const { language: rawLang } = useSettings();
+  const language = normalizeLang(rawLang);
   const [translated, setTranslated] = useState<TranslatedFields | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,9 +83,9 @@ export function useTranslatedMedicine(medicine: Medicine | null) {
       return;
     }
 
-    // Check cache
-    const langCache = translationCache.get(language);
-    if (langCache?.has(medicine.id)) {
+    // Check cache (memory + localStorage)
+    const langCache = ensureLangCache(language);
+    if (langCache.has(medicine.id)) {
       setTranslated(langCache.get(medicine.id)!);
       return;
     }
@@ -88,16 +127,17 @@ export function useTranslatedMedicine(medicine: Medicine | null) {
           dosage: t.dosage || medicine.dosage,
           manufacturer: t.manufacturer || medicine.manufacturer,
           category: t.category || medicine.category,
-          side_effects: typeof t.side_effects === "string" 
+          side_effects: typeof t.side_effects === "string"
             ? t.side_effects.split(" | ").map((s: string) => s.trim()).filter(Boolean)
             : medicine.side_effects,
           active_ingredient: t.active_ingredient || medicine.active_ingredient,
           form: t.form || medicine.form,
         };
 
-        // Cache
-        if (!translationCache.has(language)) translationCache.set(language, new Map());
-        translationCache.get(language)!.set(medicine.id, result);
+        // Cache in memory + localStorage
+        const lc = ensureLangCache(language);
+        lc.set(medicine.id, result);
+        saveCacheToStorage(language);
 
         setTranslated(result);
       } catch (e) {
@@ -116,7 +156,8 @@ export function useTranslatedMedicine(medicine: Medicine | null) {
 
 // Batch translation for lists (e.g. medicine cards)
 export function useTranslatedMedicines(medicines: Medicine[]) {
-  const { language } = useSettings();
+  const { language: rawLang } = useSettings();
+  const language = normalizeLang(rawLang);
   const [translatedMap, setTranslatedMap] = useState<Map<string, TranslatedFields>>(new Map());
   const [loading, setLoading] = useState(false);
   const prevKey = useRef("");
@@ -135,21 +176,21 @@ export function useTranslatedMedicines(medicines: Medicine[]) {
       return;
     }
 
-    // Check if all are cached
-    const langCache = translationCache.get(language);
-    const uncached = medicines.filter(m => !langCache?.has(m.id));
+    // Check if all are cached (memory + localStorage)
+    const langCache = ensureLangCache(language);
+    const uncached = medicines.filter(m => !langCache.has(m.id));
 
-    if (uncached.length === 0 && langCache) {
+    if (uncached.length === 0) {
       const map = new Map<string, TranslatedFields>();
       medicines.forEach(m => map.set(m.id, langCache.get(m.id)!));
       setTranslatedMap(map);
       return;
     }
 
-    // Fill with originals first, then translate in background
+    // Fill with cached/originals first
     const map = new Map<string, TranslatedFields>();
     medicines.forEach(m => {
-      const cached = langCache?.get(m.id);
+      const cached = langCache.get(m.id);
       map.set(m.id, cached || getOriginalFields(m));
     });
     setTranslatedMap(map);
@@ -158,7 +199,6 @@ export function useTranslatedMedicines(medicines: Medicine[]) {
 
     const translateBatch = async () => {
       setLoading(true);
-      // Translate in chunks of 5
       const chunks = [];
       for (let i = 0; i < uncached.length; i += 5) {
         chunks.push(uncached.slice(i, i + 5));
@@ -196,8 +236,7 @@ export function useTranslatedMedicines(medicines: Medicine[]) {
           const data = await response.json();
           const translations = data.translations || batchTexts;
 
-          if (!translationCache.has(language)) translationCache.set(language, new Map());
-          const lc = translationCache.get(language)!;
+          const lc = ensureLangCache(language);
 
           setTranslatedMap(prev => {
             const next = new Map(prev);
@@ -220,6 +259,7 @@ export function useTranslatedMedicines(medicines: Medicine[]) {
               lc.set(id, result);
               next.set(id, result);
             });
+            saveCacheToStorage(language);
             return next;
           });
         } catch (e) {

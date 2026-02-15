@@ -40,7 +40,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [ttsAutoRead, setTtsAutoReadState] = useState(false);
   const [colorBlindMode, setColorBlindModeState] = useState<ColorBlindMode>("none");
   const [language, setLanguageState] = useState(() => {
-    return localStorage.getItem("rxvault_language") || "en";
+    const stored = localStorage.getItem("rxvault_language") || "en";
+    // Normalize to 2-char code (e.g., "en-US" -> "en")
+    return stored.split("-")[0].toLowerCase();
   });
 
   // Apply theme
