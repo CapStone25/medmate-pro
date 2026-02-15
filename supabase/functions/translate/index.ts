@@ -14,7 +14,9 @@ serve(async (req) => {
   }
 
   try {
-    const { texts, targetLang } = await req.json();
+    const { texts, targetLang: rawLang } = await req.json();
+    // Normalize language code (e.g., "en-US" -> "en", "pt-BR" -> "pt")
+    const targetLang = rawLang?.split("-")[0]?.toLowerCase() || "en";
 
     if (!texts || !targetLang || targetLang === "en") {
       return new Response(JSON.stringify({ translations: texts }), {
