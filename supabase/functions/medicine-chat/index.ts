@@ -27,13 +27,14 @@ serve(async (req) => {
     const medicineContext = (medicines || [])
       .map(
         (m) =>
-          `- ${m.name} (${m.generic_name}): ${m.category}. ${m.description} Dosage: ${m.dosage}. Active: ${m.active_ingredient}. Form: ${m.form}. Side effects: ${(m.side_effects || []).join(", ")}. Price: ${m.price}. Prescription: ${m.requires_prescription ? "Yes" : "No"}.`
+          `- **${m.name}** (ID: ${m.id}) | Generic: ${m.generic_name} | Category: ${m.category}. ${m.description} Dosage: ${m.dosage}. Active: ${m.active_ingredient}. Form: ${m.form}. Side effects: ${(m.side_effects || []).join(", ")}. Price: ${m.price}. Prescription: ${m.requires_prescription ? "Yes" : "No"}.`
       )
       .join("\n");
 
     const langName = language || "English";
+    const baseUrl = req.headers.get("origin") || req.headers.get("referer")?.replace(/\/$/, "") || "";
 
-    const systemPrompt = `You are RxVault's friendly medicine assistant. You help users find medicines, understand dosages, side effects, and general pharmaceutical info.
+    const systemPrompt = `You are RxVault's friendly and smart medicine assistant. You help users find medicines, understand dosages, side effects, and general pharmaceutical info.
 
 IMPORTANT: Always respond in ${langName} language.
 
@@ -42,11 +43,13 @@ ${medicineContext}
 
 Guidelines:
 - If a user describes symptoms or a medicine they don't know the name of, try to identify it from the catalog above.
+- **CRITICAL**: Whenever you mention or recommend a specific medicine from the catalog, ALWAYS include a clickable link using this exact format: [Medicine Name](${baseUrl}/medicine/MEDICINE_ID). Replace MEDICINE_ID with the actual ID from the catalog. This helps users navigate directly to the medicine page.
 - Always recommend consulting a doctor for medical advice.
 - Be concise, helpful, and professional.
-- Format responses with markdown for readability.
+- Format responses with markdown for readability. Use bold for medicine names.
 - If a medicine isn't in the catalog, say so honestly and suggest they consult a pharmacist.
-- Never diagnose conditions — only provide medicine information.`;
+- Never diagnose conditions — only provide medicine information.
+- When listing multiple medicines, use a numbered list with links for each.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
