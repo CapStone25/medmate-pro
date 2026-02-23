@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings, Globe } from "lucide-react";
+import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings, Globe, Home, FlaskConical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { languages } from "@/i18n";
@@ -27,8 +27,8 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { to: "/", label: t("nav.home") },
-    { to: "/medicines", label: t("nav.medicines") },
+    { to: "/", label: t("nav.home"), icon: Home },
+    { to: "/medicines", label: t("nav.medicines"), icon: FlaskConical },
   ];
 
   const handleLogout = async () => {
@@ -65,29 +65,34 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                isActive(link.to)
-                  ? "text-primary bg-primary/8"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map(link => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
+                  isActive(link.to)
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {link.label}
+              </Link>
+            );
+          })}
           {isAuthenticated && (
             <>
               <Link
                 to={getDashboardLink()}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
                   isActive(getDashboardLink())
                     ? "text-primary bg-primary/8"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
+                <LayoutDashboard className="w-4 h-4" />
                 {t("nav.dashboard")}
               </Link>
               <Link
