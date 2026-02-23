@@ -6,6 +6,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { languages } from "@/i18n";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
+import { useNavigate } from "react-router-dom";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -20,6 +21,7 @@ const MedicineChatbot = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { language } = useSettings();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const langLabel = languages.find((l) => l.code === language)?.label || "English";
 
@@ -170,15 +172,39 @@ const MedicineChatbot = () => {
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                    className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted text-foreground rounded-bl-md"
+                        : "bg-secondary text-secondary-foreground rounded-bl-md"
                     }`}
                   >
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0 [&_strong]:text-foreground">
+                        <ReactMarkdown
+                          components={{
+                            a: ({ href, children }) => {
+                              const isMedicineLink = href?.includes("/medicine/");
+                              return (
+                                <a
+                                  href={href}
+                                  onClick={(e) => {
+                                    if (isMedicineLink && href) {
+                                      e.preventDefault();
+                                      const path = new URL(href, window.location.origin).pathname;
+                                      navigate(path);
+                                      setOpen(false);
+                                    }
+                                  }}
+                                  className="text-primary hover:text-primary/80 underline font-semibold cursor-pointer transition-colors"
+                                >
+                                  {children}
+                                </a>
+                              );
+                            },
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     ) : (
                       msg.content
