@@ -8,6 +8,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { lazy, Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import PageLoader from "@/components/PageLoader";
+import MedicineChatbot from "@/components/MedicineChatbot";
 
 const Index = lazy(() => import("./pages/Index"));
 const Medicines = lazy(() => import("./pages/Medicines"));
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <MedicineChatbot />
           </BrowserRouter>
         </SettingsProvider>
       </AuthProvider>
