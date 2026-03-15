@@ -66,8 +66,8 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("ElevenLabs error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "TTS generation failed" }), {
-        status: 500,
+      return new Response(JSON.stringify({ error: "TTS generation failed", fallback: true }), {
+        status: 503,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
