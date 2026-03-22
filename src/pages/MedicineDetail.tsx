@@ -51,17 +51,27 @@ const MedicineDetail = () => {
     fetchMedicine();
   }, [id]);
 
-  // Track search history
+  // Track medicine views in search history
   useEffect(() => {
-    if (medicine && isAuthenticated && user && !hasTracked.current) {
-      hasTracked.current = true;
-      supabase.from("search_history").insert({
+    const trackMedicineView = async () => {
+      if (!medicine || !isAuthenticated || !user || hasTracked.current) return;
+
+      const { error } = await supabase.from("search_history").insert({
         user_id: user.id,
         query: medicine.name,
         medicine_id: medicine.id,
         medicine_name: medicine.name,
       } as any);
-    }
+
+      if (error) {
+        console.error("Failed to track medicine view:", error);
+        return;
+      }
+
+      hasTracked.current = true;
+    };
+
+    trackMedicineView();
   }, [medicine, isAuthenticated, user]);
 
   // Auto-read on page load (use translated text)
