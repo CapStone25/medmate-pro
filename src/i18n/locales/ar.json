@@ -24,7 +24,7 @@
     "viewAll": "عرض جميع الأدوية",
     "forEveryone": "للجميع",
     "builtForThree": "مصمم لثلاثة أدوار",
-    "builtForThreeDesc": "سواء كنت مريضاً أو شركة أدوية أو مسؤولاً — RxVault يغطيك.",
+    "builtForThreeDesc": "سواء كنت مريضاً أو شركة أدوية أو مسؤولاً — Prescribto يغطيك.",
     "forPatients": "للمرضى",
     "forPatientsDesc": "ابحث عن الأدوية، تتبع سجلك، واحصل على معلومات الوصفات الطبية التفصيلية.",
     "forCompanies": "للشركات",
@@ -32,7 +32,7 @@
     "forAdmins": "للمسؤولين",
     "forAdminsDesc": "تحكم كامل في المستخدمين والشركات وقاعدة بيانات الأدوية.",
     "startJourney": "ابدأ رحلتك الصحية",
-    "startJourneyDesc": "انضم لآلاف المستخدمين الذين يثقون بـ RxVault للحصول على معلومات دوائية دقيقة.",
+    "startJourneyDesc": "انضم لآلاف المستخدمين الذين يثقون بـ Prescribto للحصول على معلومات دوائية دقيقة.",
     "stats": {
       "medicines": "أدوية",
       "users": "مستخدمين",
@@ -69,7 +69,7 @@
   },
   "register": {
     "createAccount": "إنشاء حساب",
-    "joinUs": "انضم إلى RxVault للوصول إلى معلومات الأدوية",
+    "joinUs": "انضم إلى Prescribto للوصول إلى معلومات الأدوية",
     "fullName": "الاسم الكامل",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",

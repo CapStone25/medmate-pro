@@ -24,7 +24,7 @@
     "viewAll": "Voir tous les médicaments",
     "forEveryone": "Pour tous",
     "builtForThree": "Conçu pour trois rôles",
-    "builtForThreeDesc": "Que vous soyez patient, entreprise pharmaceutique ou administrateur — RxVault vous couvre.",
+    "builtForThreeDesc": "Que vous soyez patient, entreprise pharmaceutique ou administrateur — Prescribto vous couvre.",
     "forPatients": "Pour les patients",
     "forPatientsDesc": "Recherchez des médicaments, suivez votre historique et accédez aux informations détaillées des ordonnances.",
     "forCompanies": "Pour les entreprises",
@@ -32,7 +32,7 @@
     "forAdmins": "Pour les administrateurs",
     "forAdminsDesc": "Contrôle total sur les utilisateurs, les entreprises et la base de données des médicaments.",
     "startJourney": "Commencez votre parcours santé",
-    "startJourneyDesc": "Rejoignez des milliers d'utilisateurs qui font confiance à RxVault.",
+    "startJourneyDesc": "Rejoignez des milliers d'utilisateurs qui font confiance à Prescribto.",
     "stats": {
       "medicines": "Médicaments",
       "users": "Utilisateurs",
@@ -69,7 +69,7 @@
   },
   "register": {
     "createAccount": "Créer un compte",
-    "joinUs": "Rejoignez RxVault pour accéder aux informations médicamenteuses",
+    "joinUs": "Rejoignez Prescribto pour accéder aux informations médicamenteuses",
     "fullName": "Nom complet",
     "email": "E-mail",
     "password": "Mot de passe",

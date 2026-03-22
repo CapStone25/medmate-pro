@@ -11,7 +11,7 @@ function normalizeLang(lang: string): string {
 const translationCache = new Map<string, Map<string, TranslatedFields>>();
 
 // localStorage persistence key prefix
-const CACHE_PREFIX = "rxvault_tr_";
+const CACHE_PREFIX = "prescribto_tr_";
 
 function loadCacheFromStorage(lang: string): Map<string, TranslatedFields> | null {
   try {
