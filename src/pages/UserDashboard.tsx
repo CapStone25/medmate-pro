@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchHistoryItem } from "@/types";
@@ -14,6 +14,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 const UserDashboard = () => {
   const { user, profile, role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
 
   usePageTitle("Dashboard");
@@ -26,18 +27,26 @@ const UserDashboard = () => {
     }
   }, [isAuthenticated, role, navigate]);
 
-  useEffect(() => {
+  const fetchHistory = async () => {
     if (!user) return;
-    const fetchHistory = async () => {
-      const { data } = await supabase
-        .from("search_history")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (data) setSearchHistory(data as unknown as SearchHistoryItem[]);
-    };
+    const { data } = await supabase
+      .from("search_history")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (data) setSearchHistory(data as unknown as SearchHistoryItem[]);
+  };
+
+  useEffect(() => {
     fetchHistory();
+  }, [user, location.key]);
+
+  // Refetch when tab/window regains focus (e.g. returning from medicine page)
+  useEffect(() => {
+    const onFocus = () => fetchHistory();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [user]);
 
   const clearHistory = async () => {
