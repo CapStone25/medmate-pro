@@ -40,9 +40,11 @@ export const useTextToSpeech = () => {
         }
       );
 
-      if (!response.ok) throw new Error("TTS failed");
+      if (!response.ok) throw new Error("fallback");
 
       const blob = await response.blob();
+      if (blob.size < 1000) throw new Error("fallback");
+
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
@@ -58,14 +60,15 @@ export const useTextToSpeech = () => {
       };
 
       await audio.play();
-    } catch (e) {
-      console.error("TTS error:", e);
-      // Fallback to browser TTS with correct language
+    } catch {
+      // Use browser built-in TTS as fallback
       if ("speechSynthesis" in window) {
+        speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = langToBCP47[language] || "en-US";
         utterance.rate = 0.9;
         utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
         speechSynthesis.speak(utterance);
         setIsSpeaking(true);
       }
