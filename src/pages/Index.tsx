@@ -69,7 +69,7 @@ const Index = () => {
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <span className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
-                    {stat.isDecimal ? stat.value : <AnimatedCounter value={stat.value as number} duration={1.5} />}
+                    <AnimatedCounter value={stat.value as number} duration={1.5} />
                   </span>
                   <span className="text-lg sm:text-xl font-bold font-display text-primary">{stat.suffix}</span>
                 </div>
