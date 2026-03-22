@@ -26,18 +26,26 @@ const UserDashboard = () => {
     }
   }, [isAuthenticated, role, navigate]);
 
-  useEffect(() => {
+  const fetchHistory = async () => {
     if (!user) return;
-    const fetchHistory = async () => {
-      const { data } = await supabase
-        .from("search_history")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (data) setSearchHistory(data as unknown as SearchHistoryItem[]);
-    };
+    const { data } = await supabase
+      .from("search_history")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (data) setSearchHistory(data as unknown as SearchHistoryItem[]);
+  };
+
+  useEffect(() => {
     fetchHistory();
+  }, [user]);
+
+  // Refetch when tab/window regains focus (e.g. returning from medicine page)
+  useEffect(() => {
+    const onFocus = () => fetchHistory();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [user]);
 
   const clearHistory = async () => {
