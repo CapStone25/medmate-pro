@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can count searches" ON public.search_history FOR SELECT TO public USING (true);

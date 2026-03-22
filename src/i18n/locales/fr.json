@@ -37,7 +37,8 @@
       "medicines": "Médicaments",
       "users": "Utilisateurs",
       "companies": "Entreprises",
-      "rating": "Note"
+      "rating": "Note",
+      "searches": "Recherches"
     }
   },
   "medicines": {

@@ -37,7 +37,8 @@
       "medicines": "医薬品",
       "users": "ユーザー",
       "companies": "企業",
-      "rating": "評価"
+      "rating": "評価",
+      "searches": "検索回数"
     }
   },
   "medicines": {

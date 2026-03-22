@@ -37,7 +37,8 @@
       "medicines": "أدوية",
       "users": "مستخدمين",
       "companies": "شركات",
-      "rating": "التقييم"
+      "rating": "التقييم",
+      "searches": "عمليات البحث"
     }
   },
   "medicines": {

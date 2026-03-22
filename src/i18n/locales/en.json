@@ -37,7 +37,8 @@
       "medicines": "Medicines",
       "users": "Users",
       "companies": "Companies",
-      "rating": "Rating"
+      "rating": "Rating",
+      "searches": "Searches"
     }
   },
   "medicines": {

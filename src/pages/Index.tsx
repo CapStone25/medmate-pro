@@ -19,17 +19,26 @@ const Index = () => {
   const { t } = useTranslation();
   const [featuredMedicines, setFeaturedMedicines] = useState<Medicine[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [companyCount, setCompanyCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [searchCount, setSearchCount] = useState(0);
 
   useEffect(() => {
-    const fetchMedicines = async () => {
-      const [{ data }, { count }] = await Promise.all([
+    const fetchData = async () => {
+      const [{ data }, { count: medCount }, { count: compCount }, { count: usrCount }, { count: srchCount }] = await Promise.all([
         supabase.from("medicines").select("*").limit(8),
         supabase.from("medicines").select("*", { count: "exact", head: true }),
+        supabase.from("companies").select("*", { count: "exact", head: true }),
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("search_history").select("*", { count: "exact", head: true }),
       ]);
       if (data) setFeaturedMedicines(data as unknown as Medicine[]);
-      if (count) setTotalCount(count);
+      setTotalCount(medCount || 0);
+      setCompanyCount(compCount || 0);
+      setUserCount(usrCount || 0);
+      setSearchCount(srchCount || 0);
     };
-    fetchMedicines();
+    fetchData();
   }, []);
 
   const { getTranslated, loading: translating } = useTranslatedMedicines(featuredMedicines);
@@ -41,10 +50,10 @@ const Index = () => {
   ];
 
   const stats = [
-    { value: totalCount || 28, suffix: "+", label: t("home.stats.medicines"), icon: TrendingUp },
-    { value: 5000, suffix: "+", label: t("home.stats.users"), icon: Users },
-    { value: 150, suffix: "+", label: t("home.stats.companies"), icon: Building2 },
-    { value: 4.9, suffix: "/5", label: t("home.stats.rating"), icon: Star, isDecimal: true },
+    { value: totalCount, suffix: "+", label: t("home.stats.medicines"), icon: TrendingUp },
+    { value: userCount, suffix: "+", label: t("home.stats.users"), icon: Users },
+    { value: companyCount, suffix: "+", label: t("home.stats.companies"), icon: Building2 },
+    { value: searchCount, suffix: "+", label: t("home.stats.searches") || "Searches", icon: Star },
   ];
 
   return (
@@ -60,7 +69,7 @@ const Index = () => {
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <span className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-foreground">
-                    {stat.isDecimal ? stat.value : <AnimatedCounter value={stat.value as number} duration={1.5} />}
+                    <AnimatedCounter value={stat.value as number} duration={1.5} />
                   </span>
                   <span className="text-lg sm:text-xl font-bold font-display text-primary">{stat.suffix}</span>
                 </div>
