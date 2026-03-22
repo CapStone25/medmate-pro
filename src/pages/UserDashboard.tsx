@@ -40,7 +40,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     fetchHistory();
-  }, [user]);
+  }, [user, location.key]);
 
   // Refetch when tab/window regains focus (e.g. returning from medicine page)
   useEffect(() => {
