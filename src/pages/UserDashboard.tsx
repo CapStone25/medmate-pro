@@ -14,6 +14,7 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 const UserDashboard = () => {
   const { user, profile, role, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
 
   usePageTitle("Dashboard");
