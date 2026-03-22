@@ -24,7 +24,7 @@
     "viewAll": "すべての医薬品を見る",
     "forEveryone": "すべての方へ",
     "builtForThree": "3つの役割に対応",
-    "builtForThreeDesc": "患者、製薬会社、管理者のいずれであっても — RxVaultがサポートします。",
+    "builtForThreeDesc": "患者、製薬会社、管理者のいずれであっても — Prescribtoがサポートします。",
     "forPatients": "患者向け",
     "forPatientsDesc": "医薬品の検索、履歴の追跡、詳細な処方情報へのアクセス。",
     "forCompanies": "企業向け",
@@ -32,7 +32,7 @@
     "forAdmins": "管理者向け",
     "forAdminsDesc": "ユーザー、企業、医薬品データベースの完全な管理。",
     "startJourney": "健康の旅を始めましょう",
-    "startJourneyDesc": "正確な医薬品情報のためにRxVaultを信頼する数千人のユーザーに参加しましょう。",
+    "startJourneyDesc": "正確な医薬品情報のためにPrescribtoを信頼する数千人のユーザーに参加しましょう。",
     "stats": {
       "medicines": "医薬品",
       "users": "ユーザー",
@@ -69,7 +69,7 @@
   },
   "register": {
     "createAccount": "アカウント作成",
-    "joinUs": "RxVaultに参加して医薬品情報にアクセス",
+    "joinUs": "Prescribtoに参加して医薬品情報にアクセス",
     "fullName": "氏名",
     "email": "メールアドレス",
     "password": "パスワード",

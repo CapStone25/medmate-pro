@@ -33,14 +33,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { user, isAuthenticated } = useAuth();
   const { i18n } = useTranslation();
   const [theme, setThemeState] = useState<"light" | "dark">(() => {
-    const saved = localStorage.getItem("rxvault_theme");
+    const saved = localStorage.getItem("prescribto_theme");
     return (saved as "light" | "dark") || "light";
   });
   const [ttsEnabled, setTtsEnabledState] = useState(true);
   const [ttsAutoRead, setTtsAutoReadState] = useState(false);
   const [colorBlindMode, setColorBlindModeState] = useState<ColorBlindMode>("none");
   const [language, setLanguageState] = useState(() => {
-    const stored = localStorage.getItem("rxvault_language") || "en";
+    const stored = localStorage.getItem("prescribto_language") || "en";
     // Normalize to 2-char code (e.g., "en-US" -> "en")
     return stored.split("-")[0].toLowerCase();
   });
@@ -48,7 +48,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Apply theme
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("rxvault_theme", theme);
+    localStorage.setItem("prescribto_theme", theme);
   }, [theme]);
 
   // Apply color blind filter
@@ -63,7 +63,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.dir = lang?.dir || "ltr";
     document.documentElement.lang = language;
     i18n.changeLanguage(language);
-    localStorage.setItem("rxvault_language", language);
+    localStorage.setItem("prescribto_language", language);
   }, [language, i18n]);
 
   // Load settings from DB

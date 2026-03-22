@@ -24,7 +24,7 @@
     "viewAll": "Tüm İlaçları Görüntüle",
     "forEveryone": "Herkes İçin",
     "builtForThree": "Üç Rol İçin Tasarlandı",
-    "builtForThreeDesc": "İster hasta, ister ilaç şirketi, ister yönetici olun — RxVault sizi kapsar.",
+    "builtForThreeDesc": "İster hasta, ister ilaç şirketi, ister yönetici olun — Prescribto sizi kapsar.",
     "forPatients": "Hastalar İçin",
     "forPatientsDesc": "İlaç arayın, geçmişinizi takip edin ve detaylı reçete bilgilerine erişin.",
     "forCompanies": "Şirketler İçin",
@@ -32,7 +32,7 @@
     "forAdmins": "Yöneticiler İçin",
     "forAdminsDesc": "Kullanıcılar, şirketler ve ilaç veritabanı üzerinde tam kontrol.",
     "startJourney": "Sağlık Yolculuğunuza Başlayın",
-    "startJourneyDesc": "Doğru ilaç bilgileri için RxVault'a güvenen binlerce kullanıcıya katılın.",
+    "startJourneyDesc": "Doğru ilaç bilgileri için Prescribto'a güvenen binlerce kullanıcıya katılın.",
     "stats": {
       "medicines": "İlaçlar",
       "users": "Kullanıcılar",
@@ -69,7 +69,7 @@
   },
   "register": {
     "createAccount": "Hesap Oluştur",
-    "joinUs": "İlaç bilgilerine erişmek için RxVault'a katılın",
+    "joinUs": "İlaç bilgilerine erişmek için Prescribto'a katılın",
     "fullName": "Ad Soyad",
     "email": "E-posta",
     "password": "Şifre",

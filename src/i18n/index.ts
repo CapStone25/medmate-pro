@@ -41,7 +41,7 @@ i18n
     detection: {
       order: ["localStorage", "navigator"],
       caches: ["localStorage"],
-      lookupLocalStorage: "rxvault_language",
+      lookupLocalStorage: "prescribto_language",
     },
   });
 

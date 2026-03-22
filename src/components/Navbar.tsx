@@ -61,7 +61,7 @@ const Navbar = () => {
           >
             <Pill className="w-5 h-5 text-primary-foreground" />
           </motion.div>
-          <span className="text-xl font-bold font-display text-gradient">RxVault</span>
+          <span className="text-xl font-bold font-display text-gradient">Prescribto</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
