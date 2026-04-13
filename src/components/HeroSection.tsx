@@ -133,6 +133,14 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
+      <QrScannerDialog
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+        onScan={(result) => {
+          setQuery(result);
+          setQrOpen(false);
+        }}
+      />
     </section>
   );
 };
