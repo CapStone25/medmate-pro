@@ -137,8 +137,24 @@ const HeroSection = () => {
         open={qrOpen}
         onClose={() => setQrOpen(false)}
         onScan={(result) => {
-          setQuery(result);
           setQrOpen(false);
+          // If the scanned text is a URL from this site, navigate to it
+          try {
+            const url = new URL(result);
+            const path = url.pathname + url.search;
+            if (url.hostname.includes("lovable.app") || url.hostname === window.location.hostname) {
+              navigate(path);
+              return;
+            }
+          } catch {}
+          // If it contains a medicine ID pattern (UUID), navigate to medicine detail
+          const uuidMatch = result.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+          if (uuidMatch) {
+            navigate(`/medicine/${uuidMatch[0]}`);
+            return;
+          }
+          // Otherwise use the scanned text as a search query
+          navigate(`/medicines?search=${encodeURIComponent(result)}`);
         }}
       />
     </section>

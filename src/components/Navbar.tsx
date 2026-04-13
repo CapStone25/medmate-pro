@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Menu, X, User, LogOut, LayoutDashboard, Settings, Globe, Home, FlaskConical } from "lucide-react";
-import logo from "@/assets/logo.png";
+import { Pill, Menu, X, User, LogOut, LayoutDashboard, Settings, Globe, Home, FlaskConical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { languages } from "@/i18n";
@@ -58,9 +57,9 @@ const Navbar = () => {
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
-            className="w-9 h-9 rounded-lg overflow-hidden shadow-glow"
+            className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow"
           >
-            <img src={logo} alt="Prescribto" className="w-full h-full object-cover" />
+            <Pill className="w-5 h-5 text-primary-foreground" />
           </motion.div>
           <span className="text-xl font-bold font-display text-gradient">Prescribto</span>
         </Link>
