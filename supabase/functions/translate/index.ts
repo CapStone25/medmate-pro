@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,8 +15,30 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { texts, targetLang: rawLang } = await req.json();
-    // Normalize language code (e.g., "en-US" -> "en", "pt-BR" -> "pt")
     const targetLang = rawLang?.split("-")[0]?.toLowerCase() || "en";
 
     if (!texts || !targetLang || targetLang === "en") {
@@ -25,13 +48,8 @@ serve(async (req) => {
     }
 
     const langNames: Record<string, string> = {
-      ar: "Arabic",
-      de: "German",
-      fr: "French",
-      es: "Spanish",
-      tr: "Turkish",
-      ja: "Japanese",
-      pt: "Portuguese",
+      ar: "Arabic", de: "German", fr: "French", es: "Spanish",
+      tr: "Turkish", ja: "Japanese", pt: "Portuguese",
     };
 
     const langName = langNames[targetLang] || "English";
@@ -68,8 +86,6 @@ ${JSON.stringify(texts)}`;
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content || "";
-
-    // Strip markdown code blocks if present
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 
     let translations;

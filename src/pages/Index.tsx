@@ -25,17 +25,17 @@ const Index = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [{ data }, { count: medCount }, { count: compCount }, { count: usrCount }, { count: srchCount }] = await Promise.all([
+      const [{ data }, { count: medCount }, { count: compCount }, { data: usrCountData }, { count: srchCount }] = await Promise.all([
         supabase.from("medicines").select("*").limit(8),
         supabase.from("medicines").select("*", { count: "exact", head: true }),
         supabase.from("companies").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.rpc("get_profiles_count"),
         supabase.from("search_history").select("*", { count: "exact", head: true }),
       ]);
       if (data) setFeaturedMedicines(data as unknown as Medicine[]);
       setTotalCount(medCount || 0);
       setCompanyCount(compCount || 0);
-      setUserCount(usrCount || 0);
+      setUserCount(typeof usrCountData === "number" ? usrCountData : 0);
       setSearchCount(srchCount || 0);
     };
     fetchData();

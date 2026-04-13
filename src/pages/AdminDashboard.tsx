@@ -64,18 +64,28 @@ const AdminDashboard = () => {
 
   const handleMedSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate inputs
+    if (form.name.length > 200 || form.generic_name.length > 200) {
+      toast.error("Name fields must be under 200 characters"); return;
+    }
+    if (form.description.length < 10 || form.description.length > 2000) {
+      toast.error("Description must be 10-2000 characters"); return;
+    }
+    if (form.price && !/^\$?\d+(\.\d{1,2})?$/.test(form.price)) {
+      toast.error("Price must be a valid amount (e.g. $9.99)"); return;
+    }
     const medicineData = {
-      name: form.name,
-      generic_name: form.generic_name,
+      name: form.name.trim().slice(0, 200),
+      generic_name: form.generic_name.trim().slice(0, 200),
       category: form.category,
-      description: form.description,
-      dosage: form.dosage,
-      price: form.price,
-      manufacturer: form.manufacturer || "Admin",
+      description: form.description.trim().slice(0, 2000),
+      dosage: form.dosage.trim().slice(0, 100),
+      price: form.price.trim().slice(0, 20),
+      manufacturer: (form.manufacturer || "Admin").trim().slice(0, 200),
       requires_prescription: true,
-      active_ingredient: form.active_ingredient || null,
-      form: form.form || null,
-      side_effects: form.side_effects ? form.side_effects.split(",").map(s => s.trim()) : [],
+      active_ingredient: form.active_ingredient?.trim().slice(0, 200) || null,
+      form: form.form?.trim().slice(0, 100) || null,
+      side_effects: form.side_effects ? form.side_effects.split(",").map(s => s.trim().slice(0, 100)).slice(0, 20) : [],
     };
 
     if (editingMedId) {
@@ -333,7 +343,7 @@ const AdminDashboard = () => {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-foreground">{u.name}</p>
-                              <p className="text-xs text-muted-foreground">{u.email}</p>
+                              <p className="text-xs text-muted-foreground">{u.email.replace(/(.{2})(.*)(@)/, (_, a, b, c) => a + '•'.repeat(Math.min(b.length, 6)) + c)}</p>
                             </div>
                           </div>
                           <Button variant={confirmDelete === u.user_id ? "destructive" : "ghost"} size="sm"

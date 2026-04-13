@@ -50,18 +50,29 @@ const CompanyDashboard = () => {
     e.preventDefault();
     if (!companyId) return;
 
+    // Validate inputs
+    if (form.name.length > 200 || form.generic_name.length > 200) {
+      toast.error("Name fields must be under 200 characters"); return;
+    }
+    if (form.description.length < 10 || form.description.length > 2000) {
+      toast.error("Description must be 10-2000 characters"); return;
+    }
+    if (form.price && !/^\$?\d+(\.\d{1,2})?$/.test(form.price)) {
+      toast.error("Price must be a valid amount (e.g. $9.99)"); return;
+    }
+
     const medicineData = {
-      name: form.name,
-      generic_name: form.generic_name,
+      name: form.name.trim().slice(0, 200),
+      generic_name: form.generic_name.trim().slice(0, 200),
       category: form.category,
-      description: form.description,
-      dosage: form.dosage,
-      price: form.price,
-      manufacturer: profile?.company_name || profile?.name || "Company",
+      description: form.description.trim().slice(0, 2000),
+      dosage: form.dosage.trim().slice(0, 100),
+      price: form.price.trim().slice(0, 20),
+      manufacturer: (profile?.company_name || profile?.name || "Company").slice(0, 200),
       requires_prescription: true,
-      active_ingredient: form.active_ingredient || null,
-      form: form.form || null,
-      side_effects: form.side_effects ? form.side_effects.split(",").map(s => s.trim()) : [],
+      active_ingredient: form.active_ingredient?.trim().slice(0, 200) || null,
+      form: form.form?.trim().slice(0, 100) || null,
+      side_effects: form.side_effects ? form.side_effects.split(",").map(s => s.trim().slice(0, 100)).slice(0, 20) : [],
       company_id: companyId,
     };
 

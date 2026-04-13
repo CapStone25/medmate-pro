@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,29 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { text, voiceId, language } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
@@ -18,26 +42,17 @@ serve(async (req) => {
       throw new Error("ELEVENLABS_API_KEY is not configured");
     }
 
-    if (!text || text.length === 0) {
+    if (!text || typeof text !== "string" || text.length === 0) {
       return new Response(JSON.stringify({ error: "Text is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Use multilingual v2 model for proper multi-language support
     const selectedVoice = voiceId || "EXAVITQu4vr4xnSDxMaL";
 
-    // Map language codes to ElevenLabs language codes
     const langMap: Record<string, string> = {
-      en: "en",
-      ar: "ar",
-      de: "de",
-      fr: "fr",
-      es: "es",
-      tr: "tr",
-      ja: "ja",
-      pt: "pt",
+      en: "en", ar: "ar", de: "de", fr: "fr", es: "es", tr: "tr", ja: "ja", pt: "pt",
     };
 
     const response = await fetch(
