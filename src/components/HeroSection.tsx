@@ -1,15 +1,17 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Mic, MicOff, Sparkles, Shield, Clock } from "lucide-react";
+import { Search, Mic, MicOff, Sparkles, Shield, Clock, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/contexts/SettingsContext";
+import QrScannerDialog from "@/components/QrScannerDialog";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
   const { t } = useTranslation();
@@ -97,6 +99,11 @@ const HeroSection = () => {
                 value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown}
                 className="flex-1 bg-transparent px-4 sm:pl-12 sm:pr-4 py-3 sm:py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none text-base rounded-xl sm:rounded-none" />
               <div className="flex items-center gap-2 justify-end">
+                <button onClick={() => setQrOpen(true)}
+                  className="p-2.5 sm:p-3 rounded-xl transition-all duration-300 hover:bg-muted text-muted-foreground hover:text-foreground"
+                  title="Scan QR Code">
+                  <ScanLine className="w-5 h-5" />
+                </button>
                 <button onClick={toggleVoiceSearch}
                   className={`p-2.5 sm:p-3 rounded-xl transition-all duration-300 ${isListening ? "gradient-accent text-accent-foreground shadow-glow-accent animate-pulse-slow" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}
                   title="Voice search">
@@ -126,6 +133,14 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
+      <QrScannerDialog
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+        onScan={(result) => {
+          setQuery(result);
+          setQrOpen(false);
+        }}
+      />
     </section>
   );
 };
