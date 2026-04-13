@@ -12,13 +12,50 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check - require admin
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check admin role
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const results: string[] = [];
 
-    // Helper to create user and set role
     const createUserWithRole = async (
       email: string, password: string, name: string, role: "admin" | "user" | "company", companyName?: string
     ) => {
@@ -34,7 +71,6 @@ serve(async (req) => {
       }
       const userId = authData?.user?.id;
       if (!userId) {
-        // Try to find existing user
         const { data: users } = await supabase.auth.admin.listUsers();
         const existing = users?.users?.find((u: any) => u.email === email);
         if (existing) {
@@ -43,11 +79,9 @@ serve(async (req) => {
         }
         return null;
       }
-      // Update role
       if (role !== "user") {
         await supabase.from("user_roles").update({ role }).eq("user_id", userId);
       }
-      // Update profile
       if (companyName) {
         await supabase.from("profiles").update({ company_name: companyName }).eq("user_id", userId);
       }
@@ -55,22 +89,21 @@ serve(async (req) => {
       return userId;
     };
 
-    // 1. Admin: Abdalraheem Ahmed
+    // Use env vars for demo passwords, fallback to generated passwords
+    const demoPassword = Deno.env.get("DEMO_PASSWORD") || crypto.randomUUID().slice(0, 16);
+
     const adminId = await createUserWithRole(
-      "abdalraheemahmed@gmail.com", "12345", "Abdalraheem Ahmed", "admin"
+      "abdalraheemahmed@gmail.com", demoPassword, "Abdalraheem Ahmed", "admin"
     );
 
-    // 2. Company 1: Ahmed Ezzat
     const company1UserId = await createUserWithRole(
-      "AhmedEzzat@gmail.com", "12345", "Ahmed Ezzat", "company", "Ahmed Ezzat Pharma"
+      "AhmedEzzat@gmail.com", demoPassword, "Ahmed Ezzat", "company", "Ahmed Ezzat Pharma"
     );
 
-    // 3. Company 2: Felopater Remon
     const company2UserId = await createUserWithRole(
-      "FelopaterRemon@gmail.com", "12345", "Felopater Remon", "company", "Felopater Remon Pharma"
+      "FelopaterRemon@gmail.com", demoPassword, "Felopater Remon", "company", "Felopater Remon Pharma"
     );
 
-    // Create company entries
     let company1Id: string | null = null;
     let company2Id: string | null = null;
 
@@ -94,7 +127,6 @@ serve(async (req) => {
       }
     }
 
-    // 4. Check if medicines already seeded
     const { count } = await supabase.from("medicines").select("*", { count: "exact", head: true });
     if (count && count > 0) {
       results.push(`Medicines already seeded (${count} found)`);
@@ -103,7 +135,6 @@ serve(async (req) => {
       });
     }
 
-    // 5. Seed medicines - split between two companies
     const company1Medicines = [
       { name: "Amoxicillin", generic_name: "Amoxicillin Trihydrate", category: "Antibiotic", description: "A penicillin-type antibiotic used to treat a wide variety of bacterial infections.", dosage: "250mg–500mg every 8 hours for 7–14 days", side_effects: ["Nausea", "Vomiting", "Diarrhea", "Skin rash", "Allergic reactions"], price: "$4.99", manufacturer: "Ahmed Ezzat Pharma", requires_prescription: true, active_ingredient: "Amoxicillin Trihydrate", form: "Capsules", image_url: "amoxicillin", company_id: company1Id },
       { name: "Ibuprofen", generic_name: "Ibuprofen", category: "Pain Relief", description: "A nonsteroidal anti-inflammatory drug (NSAID) that reduces hormones causing inflammation and pain.", dosage: "200mg–400mg every 4–6 hours", side_effects: ["Stomach upset", "Nausea", "Dizziness", "Heartburn"], price: "$3.49", manufacturer: "Ahmed Ezzat Pharma", requires_prescription: false, active_ingredient: "Ibuprofen", form: "Film-coated tablets", image_url: "ibuprofen", company_id: company1Id },
@@ -144,7 +175,7 @@ serve(async (req) => {
     if (insertErr) {
       results.push(`Medicine insert error: ${insertErr.message}`);
     } else {
-      results.push(`Seeded ${allMedicines.length} medicines (${company1Medicines.length} for Ahmed Ezzat, ${company2Medicines.length} for Felopater Remon)`);
+      results.push(`Seeded ${allMedicines.length} medicines`);
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
