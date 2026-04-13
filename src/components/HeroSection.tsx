@@ -6,10 +6,12 @@ import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/contexts/SettingsContext";
+import QrScannerDialog from "@/components/QrScannerDialog";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const navigate = useNavigate();
   const recognitionRef = useRef<any>(null);
   const { t } = useTranslation();
