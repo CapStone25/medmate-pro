@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Mic, MicOff, Sparkles, Shield, Clock } from "lucide-react";
+import { Search, Mic, MicOff, Sparkles, Shield, Clock, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
