@@ -79,19 +79,10 @@ const Login = () => {
           </p>
 
           <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-xs font-medium text-foreground mb-3">{t("login.demoAccounts")}</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: "🛡️ Admin", email: "abdalraheemahmed@gmail.com", pw: "12345" },
-                { label: "🏢 Ahmed Ezzat", email: "AhmedEzzat@gmail.com", pw: "12345" },
-                { label: "🏢 Felopater", email: "FelopaterRemon@gmail.com", pw: "12345" },
-              ].map(demo => (
-                <button key={demo.label} type="button" onClick={() => fillDemoAccount(demo.email, demo.pw)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all duration-200">
-                  {demo.label}
-                </button>
-              ))}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("login.noAccount")}{" "}
+              <Link to="/register" className="text-primary font-medium hover:underline">{t("login.createOne")}</Link>
+            </p>
           </div>
         </motion.div>
       </div>
