@@ -228,6 +228,7 @@ export type Database = {
     }
     Functions: {
       get_profiles_count: { Args: never; Returns: number }
+      get_search_history_count: { Args: never; Returns: number }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
