@@ -7,6 +7,8 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/contexts/SettingsContext";
 import QrScannerDialog from "@/components/QrScannerDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
