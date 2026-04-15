@@ -7,6 +7,8 @@ import heroBg from "@/assets/hero-bg.jpg";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/contexts/SettingsContext";
 import QrScannerDialog from "@/components/QrScannerDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
@@ -136,8 +138,10 @@ const HeroSection = () => {
       <QrScannerDialog
         open={qrOpen}
         onClose={() => setQrOpen(false)}
-        onScan={(result) => {
+        onScan={async (result) => {
           setQrOpen(false);
+          toast({ title: t("qrScanner.title", "QR Scanned"), description: result.substring(0, 100) });
+          
           // If the scanned text is a URL from this site, navigate to it
           try {
             const url = new URL(result);
@@ -147,12 +151,26 @@ const HeroSection = () => {
               return;
             }
           } catch {}
+          
           // If it contains a medicine ID pattern (UUID), navigate to medicine detail
           const uuidMatch = result.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
           if (uuidMatch) {
             navigate(`/medicine/${uuidMatch[0]}`);
             return;
           }
+          
+          // Try to find a medicine by name match
+          const { data: medicines } = await supabase
+            .from("medicines")
+            .select("id, name")
+            .ilike("name", `%${result.trim()}%`)
+            .limit(1);
+          
+          if (medicines && medicines.length > 0) {
+            navigate(`/medicine/${medicines[0].id}`);
+            return;
+          }
+          
           // Otherwise use the scanned text as a search query
           navigate(`/medicines?search=${encodeURIComponent(result)}`);
         }}
