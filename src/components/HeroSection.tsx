@@ -146,7 +146,12 @@ const HeroSection = () => {
           try {
             const url = new URL(result);
             const path = url.pathname + url.search;
-            if (url.hostname.includes("lovable.app") || url.hostname === window.location.hostname) {
+            if (
+              url.hostname === window.location.hostname ||
+              url.hostname.includes("lovable.app") ||
+              url.hostname.includes("lovableproject.com") ||
+              url.hostname.includes("care-navigate-tool")
+            ) {
               navigate(path);
               return;
             }
@@ -155,8 +160,16 @@ const HeroSection = () => {
           // If it contains a medicine ID pattern (UUID), navigate to medicine detail
           const uuidMatch = result.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
           if (uuidMatch) {
-            navigate(`/medicine/${uuidMatch[0]}`);
-            return;
+            // Verify it's a real medicine before navigating
+            const { data: med } = await supabase
+              .from("medicines")
+              .select("id")
+              .eq("id", uuidMatch[0])
+              .maybeSingle();
+            if (med) {
+              navigate(`/medicine/${med.id}`);
+              return;
+            }
           }
           
           // Try to find a medicine by name match
@@ -171,7 +184,7 @@ const HeroSection = () => {
             return;
           }
           
-          // Otherwise use the scanned text as a search query
+          // Otherwise use the scanned text as a search query  
           navigate(`/medicines?search=${encodeURIComponent(result)}`);
         }}
       />
