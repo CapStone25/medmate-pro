@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import usePageTitle from "@/hooks/usePageTitle";
 import MedicineCard from "@/components/MedicineCard";
 import { useTranslation } from "react-i18next";
+import { toast } from "@/hooks/use-toast";
 import QRCode from "react-qr-code";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
