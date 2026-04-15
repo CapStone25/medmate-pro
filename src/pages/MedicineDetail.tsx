@@ -4,7 +4,7 @@ import { Medicine } from "@/types";
 import { getMedicineImage, getCategoryColor, getCategoryIcon } from "@/utils/medicineImages";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package, Volume2, VolumeX, Loader2, Video, VideoOff } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package, Volume2, VolumeX, Loader2, Video, VideoOff, QrCode, Download, Share2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,8 @@ import { useEffect, useRef, useState } from "react";
 import usePageTitle from "@/hooks/usePageTitle";
 import MedicineCard from "@/components/MedicineCard";
 import { useTranslation } from "react-i18next";
+import QRCode from "react-qr-code";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const MedicineDetail = () => {
   const { id } = useParams();
@@ -27,6 +29,7 @@ const MedicineDetail = () => {
   const [relatedMedicines, setRelatedMedicines] = useState<Medicine[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [showVideo, setShowVideo] = useState(true);
+  const [showQr, setShowQr] = useState(false);
   const hasTracked = useRef(false);
 
   const { translated, loading: translating } = useTranslatedMedicine(medicine);
@@ -180,6 +183,78 @@ const MedicineDetail = () => {
                       {showVideo ? t("medicineDetail.hideSignLanguage") : t("medicineDetail.showSignLanguage")}
                     </Button>
                   )}
+                  <Dialog open={showQr} onOpenChange={setShowQr}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="rounded-xl gap-2">
+                        <QrCode className="w-4 h-4" />
+                        QR Code
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle className="text-center">{translated.name} — QR Code</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col items-center gap-4 p-4">
+                        <div className="bg-white p-4 rounded-xl" id="medicine-qr">
+                          <QRCode
+                            value={`https://care-navigate-tool.lovable.app/medicine/${medicine.id}`}
+                            size={220}
+                            level="H"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          {t("medicineDetail.scanQrHint", "Scan this QR code to open this medicine page")}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl gap-2"
+                            onClick={() => {
+                              const svg = document.querySelector("#medicine-qr svg") as SVGElement;
+                              if (!svg) return;
+                              const svgData = new XMLSerializer().serializeToString(svg);
+                              const canvas = document.createElement("canvas");
+                              canvas.width = 256;
+                              canvas.height = 256;
+                              const ctx = canvas.getContext("2d")!;
+                              const img = new Image();
+                              img.onload = () => {
+                                ctx.fillStyle = "#fff";
+                                ctx.fillRect(0, 0, 256, 256);
+                                ctx.drawImage(img, 0, 0, 256, 256);
+                                const a = document.createElement("a");
+                                a.download = `${medicine.name}-qr.png`;
+                                a.href = canvas.toDataURL("image/png");
+                                a.click();
+                              };
+                              img.src = "data:image/svg+xml;base64," + btoa(svgData);
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                            {t("common.download", "Download")}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl gap-2"
+                            onClick={() => {
+                              const url = `https://care-navigate-tool.lovable.app/medicine/${medicine.id}`;
+                              if (navigator.share) {
+                                navigator.share({ title: translated.name, url });
+                              } else {
+                                navigator.clipboard.writeText(url);
+                                toast({ title: t("common.copied", "Link copied!") });
+                              }
+                            }}
+                          >
+                            <Share2 className="w-4 h-4" />
+                            {t("common.share", "Share")}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>
