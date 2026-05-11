@@ -139,53 +139,63 @@ const HeroSection = () => {
         open={qrOpen}
         onClose={() => setQrOpen(false)}
         onScan={async (result) => {
+          // 1) Close dialog first so Radix can clean up the overlay/pointer-events
+          //    BEFORE we navigate. Otherwise the next page can render under a
+          //    locked body and appear blank/white.
           setQrOpen(false);
-          toast({ title: t("qrScanner.title", "QR Scanned"), description: result.substring(0, 100) });
-          
-          // If the scanned text is a URL from this site, navigate to it
+
+          // 2) Resolve where to navigate
+          let target: string | null = null;
+
+          // Direct URL → extract path
           try {
             const url = new URL(result);
-            const path = url.pathname + url.search;
             if (
               url.hostname === window.location.hostname ||
-              url.hostname.includes("lovable.app") ||
-              url.hostname.includes("lovableproject.com") ||
+              url.hostname.endsWith("lovable.app") ||
+              url.hostname.endsWith("lovableproject.com") ||
               url.hostname.includes("care-navigate-tool")
             ) {
-              navigate(path);
-              return;
+              target = url.pathname + url.search;
             }
           } catch {}
-          
-          // If it contains a medicine ID pattern (UUID), navigate to medicine detail
-          const uuidMatch = result.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-          if (uuidMatch) {
-            // Verify it's a real medicine before navigating
-            const { data: med } = await supabase
-              .from("medicines")
-              .select("id")
-              .eq("id", uuidMatch[0])
-              .maybeSingle();
-            if (med) {
-              navigate(`/medicine/${med.id}`);
-              return;
+
+          // UUID → verify medicine exists
+          if (!target) {
+            const uuidMatch = result.match(
+              /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+            );
+            if (uuidMatch) {
+              const { data: med } = await supabase
+                .from("medicines")
+                .select("id")
+                .eq("id", uuidMatch[0])
+                .maybeSingle();
+              if (med) target = `/medicine/${med.id}`;
             }
           }
-          
-          // Try to find a medicine by name match
-          const { data: medicines } = await supabase
-            .from("medicines")
-            .select("id, name")
-            .ilike("name", `%${result.trim()}%`)
-            .limit(1);
-          
-          if (medicines && medicines.length > 0) {
-            navigate(`/medicine/${medicines[0].id}`);
-            return;
+
+          // Name match fallback
+          if (!target && result.trim()) {
+            const { data: meds } = await supabase
+              .from("medicines")
+              .select("id")
+              .ilike("name", `%${result.trim()}%`)
+              .limit(1);
+            if (meds && meds.length > 0) target = `/medicine/${meds[0].id}`;
           }
-          
-          // Otherwise use the scanned text as a search query  
-          navigate(`/medicines?search=${encodeURIComponent(result)}`);
+
+          // Otherwise treat as a search query
+          if (!target) target = `/medicines?search=${encodeURIComponent(result)}`;
+
+          toast({
+            title: t("qrScanner.title", "QR Scanned"),
+            description: result.substring(0, 100),
+          });
+
+          // 3) Defer navigation past the dialog unmount tick so React Router
+            // renders the destination on a clean (unlocked) body.
+          setTimeout(() => navigate(target!), 50);
         }}
       />
     </section>

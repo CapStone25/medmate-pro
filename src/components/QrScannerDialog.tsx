@@ -12,6 +12,7 @@ interface QrScannerDialogProps {
 const QrScannerDialog = ({ open, onClose, onScan }: QrScannerDialogProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const handledRef = useRef(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -19,6 +20,7 @@ const QrScannerDialog = ({ open, onClose, onScan }: QrScannerDialogProps) => {
 
     const scannerId = "qr-reader";
     let mounted = true;
+    handledRef.current = false;
 
     const startScanner = async () => {
       try {
@@ -28,12 +30,15 @@ const QrScannerDialog = ({ open, onClose, onScan }: QrScannerDialogProps) => {
         await scanner.start(
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },
-          (decodedText) => {
-            if (mounted) {
-              onScan(decodedText);
-              scanner.stop().catch(() => {});
-              onClose();
-            }
+          async (decodedText) => {
+            if (!mounted || handledRef.current) return;
+            handledRef.current = true;
+            // Stop scanner BEFORE handing off, so the camera/decoder
+            // doesn't fire again and we don't leave the stream open.
+            try {
+              await scanner.stop();
+            } catch {}
+            onScan(decodedText);
           },
           () => {}
         );
@@ -48,8 +53,19 @@ const QrScannerDialog = ({ open, onClose, onScan }: QrScannerDialogProps) => {
     return () => {
       mounted = false;
       clearTimeout(timeout);
-      scannerRef.current?.stop().catch(() => {});
+      const s = scannerRef.current;
       scannerRef.current = null;
+      if (s) {
+        // Only call stop() if the scanner is actually running, otherwise
+        // html5-qrcode throws and the camera light can stay on.
+        try {
+          // @ts-ignore - getState exists at runtime
+          const state = s.getState?.();
+          if (state === 2 /* SCANNING */ || state === 3 /* PAUSED */) {
+            s.stop().catch(() => {});
+          }
+        } catch {}
+      }
     };
   }, [open, onScan, onClose]);
 
