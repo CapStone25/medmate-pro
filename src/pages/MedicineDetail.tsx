@@ -1,10 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Medicine } from "@/types";
 import { getMedicineImage, getCategoryColor, getCategoryIcon } from "@/utils/medicineImages";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package, Volume2, VolumeX, Loader2, Video, VideoOff, QrCode, Download, Share2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package, Volume2, VolumeX, Loader2, Video, VideoOff, QrCode, Download, Share2, SearchX, Search, ScanLine, Home } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 const MedicineDetail = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
   const { ttsAutoRead } = useSettings();
   const { speak, stop, isSpeaking, isLoading, ttsEnabled } = useTextToSpeech();
@@ -108,17 +109,88 @@ const MedicineDetail = () => {
   }
 
   if (!medicine || !translated) {
+    const scannedQuery = searchParams.get("q");
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <div className="pt-32 flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-            <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mx-auto mb-6 text-4xl">💊</div>
-            <h1 className="text-2xl font-bold font-display mb-2 text-foreground">{t("medicineDetail.notFound")}</h1>
-            <p className="text-muted-foreground mb-6">{t("medicineDetail.notFoundDesc")}</p>
-            <Link to="/medicines"><Button className="rounded-xl">{t("medicineDetail.browseMedicines")}</Button></Link>
+        <main className="flex-1 flex items-center justify-center px-4 py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative w-full max-w-xl"
+          >
+            <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl" />
+
+            <div className="relative glass-strong rounded-3xl border border-border/60 p-8 sm:p-10 text-center shadow-card-hover overflow-hidden">
+              <motion.div
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 180, damping: 14, delay: 0.1 }}
+                className="relative mx-auto mb-6 w-24 h-24 rounded-3xl gradient-primary flex items-center justify-center shadow-glow-accent"
+              >
+                <SearchX className="w-12 h-12 text-primary-foreground" />
+                <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-base font-bold shadow-lg">
+                  !
+                </span>
+              </motion.div>
+
+              <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground mb-3">
+                {t("medicineDetail.notFound", "Medicine Not Found")}
+              </h1>
+              <p className="text-muted-foreground text-sm sm:text-base mb-6 leading-relaxed">
+                {t(
+                  "medicineDetail.notFoundDesc",
+                  "We couldn't find this medicine in our database. It may have been removed, renamed, or the QR code points to an item we don't have yet."
+                )}
+              </p>
+
+              {scannedQuery && (
+                <div className="mb-6 px-4 py-3 rounded-xl bg-muted/60 border border-border/50 text-left">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                    {t("medicineDetail.youScanned", "You scanned")}
+                  </p>
+                  <p className="text-sm font-mono text-foreground break-all">{scannedQuery}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link to="/medicines" className="w-full">
+                  <Button className="w-full rounded-xl gap-2">
+                    <Search className="w-4 h-4" />
+                    {t("medicineDetail.browseMedicines", "Browse Medicines")}
+                  </Button>
+                </Link>
+                {scannedQuery ? (
+                  <Link
+                    to={`/medicines?search=${encodeURIComponent(scannedQuery)}`}
+                    className="w-full"
+                  >
+                    <Button variant="outline" className="w-full rounded-xl gap-2">
+                      <ScanLine className="w-4 h-4" />
+                      {t("medicineDetail.searchAnyway", "Search this term")}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link to="/" className="w-full">
+                    <Button variant="outline" className="w-full rounded-xl gap-2">
+                      <Home className="w-4 h-4" />
+                      {t("nav.home", "Home")}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
+              <p className="mt-6 text-xs text-muted-foreground">
+                {t(
+                  "medicineDetail.notFoundHint",
+                  "Tip: try scanning again, or search by name on the medicines page."
+                )}
+              </p>
+            </div>
           </motion.div>
-        </div>
+        </main>
       </div>
     );
   }
