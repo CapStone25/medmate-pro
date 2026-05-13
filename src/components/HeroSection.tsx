@@ -147,20 +147,35 @@ const HeroSection = () => {
           // 2) Resolve where to navigate
           let target: string | null = null;
 
-          // Direct URL → extract path
+          const encodedQ = encodeURIComponent(result.substring(0, 200));
+          const notFoundRoute = `/medicine/not-found?q=${encodedQ}`;
+
+          // Direct URL → if it points at a /medicine/:id, verify it exists
           try {
             const url = new URL(result);
-            if (
+            const sameApp =
               url.hostname === window.location.hostname ||
               url.hostname.endsWith("lovable.app") ||
               url.hostname.endsWith("lovableproject.com") ||
-              url.hostname.includes("care-navigate-tool")
-            ) {
-              target = url.pathname + url.search;
+              url.hostname.includes("care-navigate-tool");
+            if (sameApp) {
+              const medMatch = url.pathname.match(
+                /\/medicine\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i
+              );
+              if (medMatch) {
+                const { data: med } = await supabase
+                  .from("medicines")
+                  .select("id")
+                  .eq("id", medMatch[1])
+                  .maybeSingle();
+                target = med ? `/medicine/${med.id}` : notFoundRoute;
+              } else {
+                target = url.pathname + url.search;
+              }
             }
           } catch {}
 
-          // UUID → verify medicine exists
+          // UUID → verify medicine exists, otherwise show nice not-found
           if (!target) {
             const uuidMatch = result.match(
               /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
@@ -171,7 +186,7 @@ const HeroSection = () => {
                 .select("id")
                 .eq("id", uuidMatch[0])
                 .maybeSingle();
-              if (med) target = `/medicine/${med.id}`;
+              target = med ? `/medicine/${med.id}` : notFoundRoute;
             }
           }
 
@@ -182,11 +197,11 @@ const HeroSection = () => {
               .select("id")
               .ilike("name", `%${result.trim()}%`)
               .limit(1);
-            if (meds && meds.length > 0) target = `/medicine/${meds[0].id}`;
+            target = meds && meds.length > 0 ? `/medicine/${meds[0].id}` : notFoundRoute;
           }
 
-          // Otherwise treat as a search query
-          if (!target) target = `/medicines?search=${encodeURIComponent(result)}`;
+          // Empty / unrecognizable scan
+          if (!target) target = notFoundRoute;
 
           toast({
             title: t("qrScanner.title", "QR Scanned"),
