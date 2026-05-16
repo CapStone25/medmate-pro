@@ -215,6 +215,12 @@ const AdminDashboard = () => {
                     {showMedForm ? t("company.cancel") : t("company.addPrescription")}
                   </Button>
                 )}
+                {activeTab === "companies" && (
+                  <Button onClick={() => { setShowCoForm(!showCoForm); if (showCoForm) resetCoForm(); }} className="gap-2 rounded-xl">
+                    {showCoForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    {showCoForm ? "Cancel" : "Add Company"}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -242,9 +248,13 @@ const AdminDashboard = () => {
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "medicines" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
                 <Pill className="w-4 h-4 inline-block mr-2" />{t("admin.medicines")}
               </button>
+              <button onClick={() => setActiveTab("companies")}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "companies" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+                <Building2 className="w-4 h-4 inline-block mr-2" />{t("admin.companies")}
+              </button>
               <button onClick={() => setActiveTab("users")}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "users" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
-                <Users className="w-4 h-4 inline-block mr-2" />{t("admin.users")} & {t("admin.companies")}
+                <Users className="w-4 h-4 inline-block mr-2" />{t("admin.users")}
               </button>
             </div>
 
