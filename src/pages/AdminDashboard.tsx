@@ -385,7 +385,7 @@ const AdminDashboard = () => {
 
             {/* Users Tab */}
             {activeTab === "users" && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                   className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
                   <div className="p-5 border-b border-border flex items-center justify-between">
@@ -421,43 +421,100 @@ const AdminDashboard = () => {
                     </AnimatePresence>
                   </div>
                 </motion.div>
+              </div>
+            )}
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                  className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
+            {/* Companies Tab */}
+            {activeTab === "companies" && (
+              <>
+                <AnimatePresence>
+                  {showCoForm && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-6">
+                      <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                        <h2 className="text-xl font-semibold font-display text-foreground mb-5">
+                          {editingCoId ? "Edit Company" : "Add Company"}
+                        </h2>
+                        <form onSubmit={handleCoSubmit} className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Company Name</Label>
+                              <Input value={coForm.name} onChange={e => setCoForm(f => ({ ...f, name: e.target.value }))}
+                                placeholder="e.g. Pfizer" required className="rounded-xl" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Owner (company user)</Label>
+                              <select value={coForm.owner_id} onChange={e => setCoForm(f => ({ ...f, owner_id: e.target.value }))}
+                                required
+                                className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">Select owner…</option>
+                                {companiesProfiles.map(p => (
+                                  <option key={p.user_id} value={p.user_id}>{p.name} ({p.email})</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex gap-3 pt-2">
+                            <Button type="submit" className="rounded-xl gap-2">
+                              <Save className="w-4 h-4" /> {editingCoId ? "Update" : "Create"}
+                            </Button>
+                            <Button type="button" variant="outline" className="rounded-xl" onClick={resetCoForm}>
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
                   <div className="p-5 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Building2 className="w-5 h-5 text-accent" />
                       <h2 className="text-lg font-semibold font-display text-foreground">{t("admin.companies")}</h2>
                     </div>
-                    <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">{companiesProfiles.length}</span>
+                    <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">{companies.length}</span>
                   </div>
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
                     <AnimatePresence>
-                      {companiesProfiles.length > 0 ? companiesProfiles.map(c => (
-                        <motion.div key={c.user_id} layout exit={{ opacity: 0, x: -20 }}
-                          className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                              <Building2 className="w-3.5 h-3.5 text-accent" />
+                      {companies.length > 0 ? companies.map(c => {
+                        const owner = profiles.find(p => p.user_id === c.owner_id);
+                        return (
+                          <motion.div key={c.id} layout exit={{ opacity: 0, x: -20 }}
+                            className="p-4 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="w-4 h-4 text-accent" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    Owner: {owner ? `${owner.name} (${owner.email})` : c.owner_id.slice(0, 8) + "…"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Button variant="ghost" size="sm" onClick={() => handleEditCo(c)} className="text-primary">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant={confirmDeleteCo === c.id ? "destructive" : "ghost"} size="sm"
+                                  onClick={() => handleDeleteCo(c.id)} onBlur={() => setConfirmDeleteCo(null)}
+                                  className={confirmDeleteCo !== c.id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}>
+                                  {confirmDeleteCo === c.id ? (
+                                    <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {t("admin.confirm")}</span>
+                                  ) : <Trash2 className="w-4 h-4" />}
+                                </Button>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">{c.name}</p>
-                              <p className="text-xs text-muted-foreground">{c.company_name}</p>
-                            </div>
-                          </div>
-                          <Button variant={confirmDelete === c.user_id ? "destructive" : "ghost"} size="sm"
-                            onClick={() => handleRemoveUser(c.user_id)} onBlur={() => setConfirmDelete(null)}
-                            className={confirmDelete !== c.user_id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}>
-                            {confirmDelete === c.user_id ? (
-                              <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {t("admin.confirm")}</span>
-                            ) : <Trash2 className="w-4 h-4" />}
-                          </Button>
-                        </motion.div>
-                      )) : <div className="p-8 text-center text-sm text-muted-foreground">{t("admin.noCompanies")}</div>}
+                          </motion.div>
+                        );
+                      }) : <div className="p-8 text-center text-sm text-muted-foreground">{t("admin.noCompanies")}</div>}
                     </AnimatePresence>
                   </div>
-                </motion.div>
-              </div>
+                </div>
+              </>
             )}
           </motion.div>
         </div>
