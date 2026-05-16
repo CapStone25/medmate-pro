@@ -139,6 +139,52 @@ const AdminDashboard = () => {
   const users = profiles.filter(p => p.role === "user");
   const companiesProfiles = profiles.filter(p => p.role === "company");
 
+  const resetCoForm = () => {
+    setCoForm({ name: "", owner_id: "" });
+    setShowCoForm(false);
+    setEditingCoId(null);
+  };
+
+  const handleCoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = coForm.name.trim();
+    if (name.length < 2 || name.length > 200) {
+      toast.error("Company name must be 2-200 characters"); return;
+    }
+    if (!coForm.owner_id) {
+      toast.error("Select an owner"); return;
+    }
+    if (editingCoId) {
+      const { data, error } = await supabase.from("companies")
+        .update({ name, owner_id: coForm.owner_id }).eq("id", editingCoId).select().single();
+      if (error) { toast.error("Failed to update company"); return; }
+      setCompanies(prev => prev.map(c => c.id === editingCoId ? data as unknown as Company : c));
+      toast.success("Company updated");
+    } else {
+      const { data, error } = await supabase.from("companies")
+        .insert({ name, owner_id: coForm.owner_id }).select().single();
+      if (error) { toast.error("Failed to create company"); return; }
+      setCompanies(prev => [data as unknown as Company, ...prev]);
+      toast.success("Company created");
+    }
+    resetCoForm();
+  };
+
+  const handleEditCo = (c: Company) => {
+    setCoForm({ name: c.name, owner_id: c.owner_id });
+    setEditingCoId(c.id);
+    setShowCoForm(true);
+  };
+
+  const handleDeleteCo = async (id: string) => {
+    if (confirmDeleteCo !== id) { setConfirmDeleteCo(id); return; }
+    const { error } = await supabase.from("companies").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete company"); return; }
+    setCompanies(prev => prev.filter(c => c.id !== id));
+    setConfirmDeleteCo(null);
+    toast.success("Company deleted");
+  };
+
   const stats = [
     { icon: Users, value: users.length, label: t("admin.totalUsers"), color: "bg-primary/10 text-primary" },
     { icon: Building2, value: companiesProfiles.length, label: t("admin.companies"), color: "bg-accent/10 text-accent" },
