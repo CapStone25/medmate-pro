@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Medicine, Profile } from "@/types";
+import { Medicine, Profile, Company } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Building2, Pill, Trash2, Shield, AlertTriangle, Plus, X, Edit, Package } from "lucide-react";
+import { Users, Building2, Pill, Trash2, Shield, AlertTriangle, Plus, X, Edit, Package, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,11 +23,16 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<(Profile & { role?: string })[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [confirmDeleteMed, setConfirmDeleteMed] = useState<string | null>(null);
+  const [confirmDeleteCo, setConfirmDeleteCo] = useState<string | null>(null);
   const [showMedForm, setShowMedForm] = useState(false);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "medicines">("medicines");
+  const [activeTab, setActiveTab] = useState<"users" | "medicines" | "companies">("medicines");
+  const [showCoForm, setShowCoForm] = useState(false);
+  const [editingCoId, setEditingCoId] = useState<string | null>(null);
+  const [coForm, setCoForm] = useState({ name: "", owner_id: "" });
   const [form, setForm] = useState({
     name: "", generic_name: "", category: "Antibiotic", description: "", dosage: "", price: "",
     active_ingredient: "", form: "", side_effects: "", manufacturer: "",
@@ -38,10 +43,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!isAuthenticated || role !== "admin") { navigate("/login"); return; }
     const fetchData = async () => {
-      const [profilesRes, rolesRes, medsRes] = await Promise.all([
+      const [profilesRes, rolesRes, medsRes, coRes] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("user_roles").select("*"),
         supabase.from("medicines").select("*").order("created_at", { ascending: false }),
+        supabase.from("companies").select("*").order("created_at", { ascending: false }),
       ]);
       const roles = (rolesRes.data || []) as any[];
       const profs = ((profilesRes.data || []) as unknown as Profile[]).map(p => ({
@@ -50,6 +56,7 @@ const AdminDashboard = () => {
       }));
       setProfiles(profs);
       if (medsRes.data) setMedicines(medsRes.data as unknown as Medicine[]);
+      if (coRes.data) setCompanies(coRes.data as unknown as Company[]);
     };
     fetchData();
   }, [isAuthenticated, role, navigate]);
