@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Medicine, Profile } from "@/types";
+import { Medicine, Profile, Company } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Building2, Pill, Trash2, Shield, AlertTriangle, Plus, X, Edit, Package } from "lucide-react";
+import { Users, Building2, Pill, Trash2, Shield, AlertTriangle, Plus, X, Edit, Package, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,11 +23,16 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<(Profile & { role?: string })[]>([]);
   const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [confirmDeleteMed, setConfirmDeleteMed] = useState<string | null>(null);
+  const [confirmDeleteCo, setConfirmDeleteCo] = useState<string | null>(null);
   const [showMedForm, setShowMedForm] = useState(false);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "medicines">("medicines");
+  const [activeTab, setActiveTab] = useState<"users" | "medicines" | "companies">("medicines");
+  const [showCoForm, setShowCoForm] = useState(false);
+  const [editingCoId, setEditingCoId] = useState<string | null>(null);
+  const [coForm, setCoForm] = useState({ name: "", owner_id: "" });
   const [form, setForm] = useState({
     name: "", generic_name: "", category: "Antibiotic", description: "", dosage: "", price: "",
     active_ingredient: "", form: "", side_effects: "", manufacturer: "",
@@ -38,10 +43,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (!isAuthenticated || role !== "admin") { navigate("/login"); return; }
     const fetchData = async () => {
-      const [profilesRes, rolesRes, medsRes] = await Promise.all([
+      const [profilesRes, rolesRes, medsRes, coRes] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("user_roles").select("*"),
         supabase.from("medicines").select("*").order("created_at", { ascending: false }),
+        supabase.from("companies").select("*").order("created_at", { ascending: false }),
       ]);
       const roles = (rolesRes.data || []) as any[];
       const profs = ((profilesRes.data || []) as unknown as Profile[]).map(p => ({
@@ -50,6 +56,7 @@ const AdminDashboard = () => {
       }));
       setProfiles(profs);
       if (medsRes.data) setMedicines(medsRes.data as unknown as Medicine[]);
+      if (coRes.data) setCompanies(coRes.data as unknown as Company[]);
     };
     fetchData();
   }, [isAuthenticated, role, navigate]);
@@ -132,6 +139,52 @@ const AdminDashboard = () => {
   const users = profiles.filter(p => p.role === "user");
   const companiesProfiles = profiles.filter(p => p.role === "company");
 
+  const resetCoForm = () => {
+    setCoForm({ name: "", owner_id: "" });
+    setShowCoForm(false);
+    setEditingCoId(null);
+  };
+
+  const handleCoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = coForm.name.trim();
+    if (name.length < 2 || name.length > 200) {
+      toast.error("Company name must be 2-200 characters"); return;
+    }
+    if (!coForm.owner_id) {
+      toast.error("Select an owner"); return;
+    }
+    if (editingCoId) {
+      const { data, error } = await supabase.from("companies")
+        .update({ name, owner_id: coForm.owner_id }).eq("id", editingCoId).select().single();
+      if (error) { toast.error("Failed to update company"); return; }
+      setCompanies(prev => prev.map(c => c.id === editingCoId ? data as unknown as Company : c));
+      toast.success("Company updated");
+    } else {
+      const { data, error } = await supabase.from("companies")
+        .insert({ name, owner_id: coForm.owner_id }).select().single();
+      if (error) { toast.error("Failed to create company"); return; }
+      setCompanies(prev => [data as unknown as Company, ...prev]);
+      toast.success("Company created");
+    }
+    resetCoForm();
+  };
+
+  const handleEditCo = (c: Company) => {
+    setCoForm({ name: c.name, owner_id: c.owner_id });
+    setEditingCoId(c.id);
+    setShowCoForm(true);
+  };
+
+  const handleDeleteCo = async (id: string) => {
+    if (confirmDeleteCo !== id) { setConfirmDeleteCo(id); return; }
+    const { error } = await supabase.from("companies").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete company"); return; }
+    setCompanies(prev => prev.filter(c => c.id !== id));
+    setConfirmDeleteCo(null);
+    toast.success("Company deleted");
+  };
+
   const stats = [
     { icon: Users, value: users.length, label: t("admin.totalUsers"), color: "bg-primary/10 text-primary" },
     { icon: Building2, value: companiesProfiles.length, label: t("admin.companies"), color: "bg-accent/10 text-accent" },
@@ -162,6 +215,12 @@ const AdminDashboard = () => {
                     {showMedForm ? t("company.cancel") : t("company.addPrescription")}
                   </Button>
                 )}
+                {activeTab === "companies" && (
+                  <Button onClick={() => { setShowCoForm(!showCoForm); if (showCoForm) resetCoForm(); }} className="gap-2 rounded-xl">
+                    {showCoForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    {showCoForm ? "Cancel" : "Add Company"}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -189,9 +248,13 @@ const AdminDashboard = () => {
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "medicines" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
                 <Pill className="w-4 h-4 inline-block mr-2" />{t("admin.medicines")}
               </button>
+              <button onClick={() => setActiveTab("companies")}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "companies" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+                <Building2 className="w-4 h-4 inline-block mr-2" />{t("admin.companies")}
+              </button>
               <button onClick={() => setActiveTab("users")}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "users" ? "bg-primary text-primary-foreground shadow-glow" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
-                <Users className="w-4 h-4 inline-block mr-2" />{t("admin.users")} & {t("admin.companies")}
+                <Users className="w-4 h-4 inline-block mr-2" />{t("admin.users")}
               </button>
             </div>
 
@@ -322,7 +385,7 @@ const AdminDashboard = () => {
 
             {/* Users Tab */}
             {activeTab === "users" && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                   className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
                   <div className="p-5 border-b border-border flex items-center justify-between">
@@ -358,43 +421,100 @@ const AdminDashboard = () => {
                     </AnimatePresence>
                   </div>
                 </motion.div>
+              </div>
+            )}
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                  className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
+            {/* Companies Tab */}
+            {activeTab === "companies" && (
+              <>
+                <AnimatePresence>
+                  {showCoForm && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-6">
+                      <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                        <h2 className="text-xl font-semibold font-display text-foreground mb-5">
+                          {editingCoId ? "Edit Company" : "Add Company"}
+                        </h2>
+                        <form onSubmit={handleCoSubmit} className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Company Name</Label>
+                              <Input value={coForm.name} onChange={e => setCoForm(f => ({ ...f, name: e.target.value }))}
+                                placeholder="e.g. Pfizer" required className="rounded-xl" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Owner (company user)</Label>
+                              <select value={coForm.owner_id} onChange={e => setCoForm(f => ({ ...f, owner_id: e.target.value }))}
+                                required
+                                className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">Select owner…</option>
+                                {companiesProfiles.map(p => (
+                                  <option key={p.user_id} value={p.user_id}>{p.name} ({p.email})</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex gap-3 pt-2">
+                            <Button type="submit" className="rounded-xl gap-2">
+                              <Save className="w-4 h-4" /> {editingCoId ? "Update" : "Create"}
+                            </Button>
+                            <Button type="button" variant="outline" className="rounded-xl" onClick={resetCoForm}>
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
                   <div className="p-5 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Building2 className="w-5 h-5 text-accent" />
                       <h2 className="text-lg font-semibold font-display text-foreground">{t("admin.companies")}</h2>
                     </div>
-                    <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">{companiesProfiles.length}</span>
+                    <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">{companies.length}</span>
                   </div>
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
                     <AnimatePresence>
-                      {companiesProfiles.length > 0 ? companiesProfiles.map(c => (
-                        <motion.div key={c.user_id} layout exit={{ opacity: 0, x: -20 }}
-                          className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                              <Building2 className="w-3.5 h-3.5 text-accent" />
+                      {companies.length > 0 ? companies.map(c => {
+                        const owner = profiles.find(p => p.user_id === c.owner_id);
+                        return (
+                          <motion.div key={c.id} layout exit={{ opacity: 0, x: -20 }}
+                            className="p-4 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="w-4 h-4 text-accent" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    Owner: {owner ? `${owner.name} (${owner.email})` : c.owner_id.slice(0, 8) + "…"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Button variant="ghost" size="sm" onClick={() => handleEditCo(c)} className="text-primary">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant={confirmDeleteCo === c.id ? "destructive" : "ghost"} size="sm"
+                                  onClick={() => handleDeleteCo(c.id)} onBlur={() => setConfirmDeleteCo(null)}
+                                  className={confirmDeleteCo !== c.id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}>
+                                  {confirmDeleteCo === c.id ? (
+                                    <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {t("admin.confirm")}</span>
+                                  ) : <Trash2 className="w-4 h-4" />}
+                                </Button>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium text-foreground">{c.name}</p>
-                              <p className="text-xs text-muted-foreground">{c.company_name}</p>
-                            </div>
-                          </div>
-                          <Button variant={confirmDelete === c.user_id ? "destructive" : "ghost"} size="sm"
-                            onClick={() => handleRemoveUser(c.user_id)} onBlur={() => setConfirmDelete(null)}
-                            className={confirmDelete !== c.user_id ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}>
-                            {confirmDelete === c.user_id ? (
-                              <span className="flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {t("admin.confirm")}</span>
-                            ) : <Trash2 className="w-4 h-4" />}
-                          </Button>
-                        </motion.div>
-                      )) : <div className="p-8 text-center text-sm text-muted-foreground">{t("admin.noCompanies")}</div>}
+                          </motion.div>
+                        );
+                      }) : <div className="p-8 text-center text-sm text-muted-foreground">{t("admin.noCompanies")}</div>}
                     </AnimatePresence>
                   </div>
-                </motion.div>
-              </div>
+                </div>
+              </>
             )}
           </motion.div>
         </div>
