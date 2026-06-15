@@ -9,6 +9,8 @@ import { lazy, Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import PageLoader from "@/components/PageLoader";
 import MedicineChatbot from "@/components/MedicineChatbot";
+import PageTransition from "@/components/PageTransition";
+import { AnimatePresence } from "framer-motion";
 
 const Index = lazy(() => import("./pages/Index"));
 const Medicines = lazy(() => import("./pages/Medicines"));
@@ -33,18 +35,22 @@ const App = () => (
           <BrowserRouter>
             <ScrollToTop />
             <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/medicines" element={<Medicines />} />
-                <Route path="/medicine/:id" element={<MedicineDetail />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<UserDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/company" element={<CompanyDashboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AnimatePresence mode="wait">
+                <PageTransition>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/medicines" element={<Medicines />} />
+                    <Route path="/medicine/:id" element={<MedicineDetail />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/dashboard" element={<UserDashboard />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/company" element={<CompanyDashboard />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </PageTransition>
+              </AnimatePresence>
             </Suspense>
             <MedicineChatbot />
           </BrowserRouter>
