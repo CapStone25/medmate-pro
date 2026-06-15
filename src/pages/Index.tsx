@@ -28,7 +28,7 @@ const Index = () => {
       const [{ data }, { count: medCount }, { data: compCountData }, { data: usrCountData }, { data: srchCountData }] = await Promise.all([
         supabase.from("medicines").select("*").limit(8),
         supabase.from("medicines").select("*", { count: "exact", head: true }),
-        supabase.rpc("get_companies_count"),
+        supabase.rpc("get_companies_count" as any),
         supabase.rpc("get_profiles_count"),
         supabase.rpc("get_search_history_count"),
       ]);
