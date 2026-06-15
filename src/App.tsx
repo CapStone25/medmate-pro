@@ -17,6 +17,8 @@ const Medicines = lazy(() => import("./pages/Medicines"));
 const MedicineDetail = lazy(() => import("./pages/MedicineDetail"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const UserDashboard = lazy(() => import("./pages/UserDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
@@ -43,6 +45,8 @@ const App = () => (
                     <Route path="/medicine/:id" element={<MedicineDetail />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/dashboard" element={<UserDashboard />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/company" element={<CompanyDashboard />} />

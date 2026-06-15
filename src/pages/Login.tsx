@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pill, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Pill, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePageTitle from "@/hooks/usePageTitle";
 import { useTranslation } from "react-i18next";
+import { loginSchema, friendlyAuthError } from "@/lib/authValidation";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { login } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -23,18 +26,27 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as "email" | "password";
+        if (!fieldErrors[k]) fieldErrors[k] = i.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
     setLoading(true);
-    const result = await login(email, password);
+    const result = await login(parsed.data.email, parsed.data.password);
     if (result.success) {
       toast.success(t("login.welcomeMsg"));
       navigate("/");
     } else {
-      toast.error(result.error || "Invalid email or password");
+      toast.error(friendlyAuthError(result.error));
     }
     setLoading(false);
   };
-
-  const fillDemoAccount = (e: string, p: string) => { setEmail(e); setPassword(p); };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -50,26 +62,47 @@ const Login = () => {
           <h1 className="text-3xl font-bold font-display text-foreground mb-2">{t("login.welcomeBack")}</h1>
           <p className="text-muted-foreground mb-8">{t("login.signInDesc")}</p>
 
+          <GoogleSignInButton />
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">{t("login.email")}</Label>
-              <Input id="email" type="email" placeholder="name@example.com" value={email}
-                onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl" />
+              <Input id="email" type="email" autoComplete="email" placeholder="name@example.com" value={email}
+                onChange={e => setEmail(e.target.value)} aria-invalid={!!errors.email}
+                className={`h-12 rounded-xl ${errors.email ? "border-destructive" : ""}`} />
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t("login.password")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t("login.password")}</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password"
-                  value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-xl pr-12" />
+                <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password"
+                  placeholder="Enter your password"
+                  value={password} onChange={e => setPassword(e.target.value)} aria-invalid={!!errors.password}
+                  className={`h-12 rounded-xl pr-12 ${errors.password ? "border-destructive" : ""}`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
             </div>
             <Button type="submit" className="w-full h-12 rounded-xl text-base gap-2 group" disabled={loading}>
-              {loading ? t("login.signingIn") : t("login.signIn")}
-              {!loading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t("login.signingIn")}</>
+              ) : (
+                <>{t("login.signIn")} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>
+              )}
             </Button>
           </form>
 
@@ -77,13 +110,6 @@ const Login = () => {
             {t("login.noAccount")}{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">{t("login.createOne")}</Link>
           </p>
-
-          <div className="mt-8 p-4 rounded-xl bg-muted/50 border border-border">
-            <p className="text-xs text-muted-foreground">
-              {t("login.noAccount")}{" "}
-              <Link to="/register" className="text-primary font-medium hover:underline">{t("login.createOne")}</Link>
-            </p>
-          </div>
         </motion.div>
       </div>
 
