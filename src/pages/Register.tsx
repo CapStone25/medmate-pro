@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { Pill, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Pill, Eye, EyeOff, ArrowRight, Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePageTitle from "@/hooks/usePageTitle";
 import { useTranslation } from "react-i18next";
+import { registerSchema, friendlyAuthError } from "@/lib/authValidation";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -16,6 +18,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
   const { register } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -24,16 +27,33 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    const parsed = registerSchema.safeParse({ name, email, password });
+    if (!parsed.success) {
+      const fieldErrors: { name?: string; email?: string; password?: string } = {};
+      parsed.error.issues.forEach((i) => {
+        const k = i.path[0] as "name" | "email" | "password";
+        if (!fieldErrors[k]) fieldErrors[k] = i.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
     setLoading(true);
-    const result = await register(name, email, password);
+    const result = await register(parsed.data.name, parsed.data.email, parsed.data.password);
     if (result.success) {
       toast.success(t("register.success"));
       navigate("/");
     } else {
-      toast.error(result.error || "Registration failed");
+      toast.error(friendlyAuthError(result.error));
     }
     setLoading(false);
   };
+
+  const pwChecks = [
+    { label: "At least 8 characters", ok: password.length >= 8 },
+    { label: "Contains a number", ok: /\d/.test(password) },
+    { label: "Contains a letter", ok: /[a-zA-Z]/.test(password) },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -63,32 +83,58 @@ const Register = () => {
           <h1 className="text-3xl font-bold font-display text-foreground mb-2">{t("register.createAccount")}</h1>
           <p className="text-muted-foreground mb-8">{t("register.joinUs")}</p>
 
+          <GoogleSignInButton />
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">{t("register.fullName")}</Label>
-              <Input id="name" placeholder="Enter your name" value={name}
-                onChange={e => setName(e.target.value)} required className="h-12 rounded-xl" />
+              <Input id="name" autoComplete="name" placeholder="Enter your name" value={name}
+                onChange={e => setName(e.target.value)} aria-invalid={!!errors.name}
+                className={`h-12 rounded-xl ${errors.name ? "border-destructive" : ""}`} />
+              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t("register.email")}</Label>
-              <Input id="email" type="email" placeholder="name@example.com" value={email}
-                onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl" />
+              <Input id="email" type="email" autoComplete="email" placeholder="name@example.com" value={email}
+                onChange={e => setEmail(e.target.value)} aria-invalid={!!errors.email}
+                className={`h-12 rounded-xl ${errors.email ? "border-destructive" : ""}`} />
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t("register.password")}</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"}
-                  placeholder="Create a password (min 6 chars)" value={password}
-                  onChange={e => setPassword(e.target.value)} required minLength={6} className="h-12 rounded-xl pr-12" />
+                <Input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password"
+                  placeholder="Create a strong password" value={password}
+                  onChange={e => setPassword(e.target.value)} aria-invalid={!!errors.password}
+                  className={`h-12 rounded-xl pr-12 ${errors.password ? "border-destructive" : ""}`} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+              {password.length > 0 && (
+                <ul className="text-xs space-y-1 mt-2">
+                  {pwChecks.map((c) => (
+                    <li key={c.label} className={`flex items-center gap-1.5 ${c.ok ? "text-primary" : "text-muted-foreground"}`}>
+                      <Check className={`w-3 h-3 ${c.ok ? "opacity-100" : "opacity-30"}`} /> {c.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <Button type="submit" className="w-full h-12 rounded-xl text-base gap-2 group" disabled={loading}>
-              {loading ? t("register.creating") : t("register.createAccount")}
-              {!loading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> {t("register.creating")}</>
+              ) : (
+                <>{t("register.createAccount")} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>
+              )}
             </Button>
           </form>
 
