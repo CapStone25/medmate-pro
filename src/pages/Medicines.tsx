@@ -8,6 +8,7 @@ import { categories } from "@/utils/medicineImages";
 import MedicineCard from "@/components/MedicineCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/usePageTitle";
@@ -73,6 +74,10 @@ const Medicines = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <SEO
+        title="Medicine Catalog — Prescribto"
+        description="Browse and search Prescribto's medicine catalog. Filter by category, view dosage, side effects, and prescription details in your language."
+      />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 sm:mb-8">
