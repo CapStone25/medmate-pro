@@ -114,6 +114,9 @@ const Navbar = () => {
           <div ref={langRef} className="relative">
             <button
               onClick={() => setLangOpen(!langOpen)}
+              aria-label="Select language"
+              aria-haspopup="listbox"
+              aria-expanded={langOpen}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-300"
             >
               <Globe className="w-4 h-4" />
