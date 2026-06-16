@@ -1,0 +1,15 @@
+# Prescribto
+
+> Accessibility-first medicine catalog with AI search, QR scanning, voice search, text-to-speech, sign-language video, and multilingual support across 8 languages.
+
+Prescribto helps patients, caregivers, and pharmacies look up trustworthy information about medicines — dosage, side effects, manufacturer, and active ingredients — in the language and format that works best for them.
+
+## Pages
+
+- [Home](/): Overview of Prescribto, featured medicines, and project statistics.
+- [Medicine Catalog](/medicines): Browse and search all medicines by name or category.
+
+## Optional
+
+- [Sign in](/login): Account access for personalized features.
+- [Create account](/register): Register as a patient or pharmaceutical company.
