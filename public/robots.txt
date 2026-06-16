@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://care-navigate-tool.lovable.app/sitemap.xml

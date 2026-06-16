@@ -3,6 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import MedicineCard from "@/components/MedicineCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Medicine } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <SEO
+        title="Prescribto — Your Digital Prescription Companion"
+        description="Search medicines, scan QR codes, and get accessible drug information in 8 languages with voice and sign-language support."
+      />
+      <main>
       <HeroSection />
 
       <section className="py-8 sm:py-12 bg-card border-y border-border">
@@ -155,6 +161,7 @@ const Index = () => {
         </div>
       </section>
 
+      </main>
       <Footer />
     </div>
   );

@@ -102,11 +102,13 @@ const HeroSection = () => {
                 className="flex-1 bg-transparent px-4 sm:pl-12 sm:pr-4 py-3 sm:py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none text-base rounded-xl sm:rounded-none" />
               <div className="flex items-center gap-2 justify-end">
                 <button onClick={() => setQrOpen(true)}
+                  aria-label="Scan QR Code"
                   className="p-2.5 sm:p-3 rounded-xl transition-all duration-300 hover:bg-muted text-muted-foreground hover:text-foreground"
                   title="Scan QR Code">
                   <ScanLine className="w-5 h-5" />
                 </button>
                 <button onClick={toggleVoiceSearch}
+                  aria-label="Voice search"
                   className={`p-2.5 sm:p-3 rounded-xl transition-all duration-300 ${isListening ? "gradient-accent text-accent-foreground shadow-glow-accent animate-pulse-slow" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}
                   title="Voice search">
                   {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}

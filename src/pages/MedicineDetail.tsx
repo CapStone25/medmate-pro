@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle, Pill, Building2, DollarSign, Info, Stethoscope, FlaskConical, Package, Volume2, VolumeX, Loader2, Video, VideoOff, QrCode, Download, Share2, SearchX, Search, ScanLine, Home } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
@@ -207,6 +208,20 @@ const MedicineDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <SEO
+        title={`${medicine.name} — Prescribto`}
+        description={(translated.description || `Information about ${medicine.name}: dosage, side effects, and manufacturer details.`).slice(0, 160)}
+        type="product"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Drug",
+          name: medicine.name,
+          description: translated.description || undefined,
+          manufacturer: translated.manufacturer ? { "@type": "Organization", name: translated.manufacturer } : undefined,
+          activeIngredient: translated.active_ingredient || undefined,
+          dosageForm: translated.form || undefined,
+        }}
+      />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
